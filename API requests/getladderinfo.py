@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+This script checks for standings in the current SC2 ladder and updates player
+standings and match history. Running the script will result in making about 50,000
+individual API calls to battle.net for *each server*.
+The responses are recorded and exported to matches_data.csv
 
-This is a temporary script file.
+Michael Hao
 """
+
+#Importing necessary modules
 import numpy as np #for arrays
 import pandas as pd #for data frames
 import time
@@ -14,6 +19,8 @@ from joblib import Parallel, delayed # for running parallel requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
+#11.6.2022: Note that access tokens are temporary and need to be changed to run the code by logging into the battle.net account.
+#Creating dictionaries to convert battle.net terms to english
 region_id = {"us":1,
              "eu":2}
 ladder_id = {0:"Bronze", 1:"Silver", 2:"Gold", 3:"Platinum",
@@ -21,7 +28,9 @@ ladder_id = {0:"Bronze", 1:"Silver", 2:"Gold", 3:"Platinum",
 token = {"access_token":"EUPsQbMXte0hp3FT0oVdyu3qOBEwlGofBR"}
 #####################################################
 
+#Defining a function that makes a API call to get ids for individual ladders given the league type
 def getladder(season, region, leagueid, teamtype, queueid):
+    #for specifics on this part, see the battle.net API documentations on starcraft 2
     league_url =  ("https://"+
                   str(region)+
                   ".api.blizzard.com/data/sc2/league/"+
@@ -33,12 +42,15 @@ def getladder(season, region, leagueid, teamtype, queueid):
                   "/"+
                   str(leagueid)
         )
+    #save the response to league_response
     league_response = requests.get(league_url, params={"locale": "en_US",
                     "access_token": "EUPsQbMXte0hp3FT0oVdyu3qOBEwlGofBR"})
+    #Check if the response is 200 OK
     if "200" in str(league_response):
         print("request successful for " + region + " league " + str(leagueid) +
               str(ladder_id[leagueid]))
         return(league_response.json()["tier"])
+    #If the response is not 200 OK, print an error message:
     else:
         print("error while retrieving match data from " 
               + region + " league " + str(leagueid))
@@ -46,6 +58,7 @@ def getladder(season, region, leagueid, teamtype, queueid):
         
 ######################################################
 
+#Defining a function that updates 1v1 ladder statistics by calling getladder()
 def update1v1ladder(region, season):
     ladderlist =[]
     for i in range(7):
@@ -55,6 +68,7 @@ def update1v1ladder(region, season):
 
 #####################################################
 
+#By calling update1v1ladder() on different servers and different seasons, we can update the current standings
 test_ladder = update1v1ladder("eu", 52)
 
 def fromtiers_getladderid(data_of_entire_ladder, leagueid, tier):
