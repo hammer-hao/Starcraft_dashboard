@@ -30,7 +30,8 @@ mrequest.mount('https://', adapter)
 #11.6.2022: Note that access tokens are temporary and need to be changed to run the code by logging into the battle.net account.
 #Creating dictionaries to convert battle.net terms to english
 region_id = {"us":1,
-             "eu":2}
+             "eu":2,
+             "kr":3}
 ladder_id = {0:"Bronze", 1:"Silver", 2:"Gold", 3:"Platinum",
              4:"Diamond", 5:"Masters", 6:"Grandmaster"}
 token = {"access_token":"EUe7zpGALh34AbNXhfQg77CdgYI1TLxHyQ"}
@@ -172,17 +173,20 @@ def update_playerstats(listed_ladderid, region):
                     #Call the fromladder_getplayers() function within the loop to get player details for individual ladder
                     members = fromladder_getplayers(ladder, region)
                     #Now loop through each player in that ladder, and create a list storing the details of each player
-                    for member in members:
-                        try:
-                            playerstats = [member["character"]["displayName"],
-                                           member["character"]["id"], 
-                                           division,
-                                           member["favoriteRaceP1"]]
-                        #If one characteristic is not specified, ignore and move on
-                        except KeyError:
-                            pass
-                        #At the end, append the player's details to our list
-                        playerslist.append(playerstats)
+                    try:
+                        for member in members:
+                            try:
+                                playerstats = [member["character"]["displayName"],
+                                               member["character"]["id"], 
+                                               division,
+                                               member["favoriteRaceP1"]]
+                            #If one characteristic is not specified, ignore and move on
+                            except KeyError:
+                                pass
+                            #At the end, append the player's details to our list
+                            playerslist.append(playerstats)
+                    except TypeError:
+                        pass
                 del division
             else:
                 print("subdiv does not exist for " + str(ladder_id[i]) + " tier " + str(idx2+1))
@@ -192,15 +196,40 @@ def update_playerstats(listed_ladderid, region):
 #Now by calling update_playerstats and specifying a list of ladders, we shall get a output of a list of all players
 #Note: Running the following part of code will make *Hundreds* of individual api calls
 us_players = update_playerstats(us_ladderid_list, "us")
+us_gm_list = fromladder_getplayers(310096, "us")
+for member in us_gm_list:
+        try:
+            playerstats = [member["character"]["displayName"],
+                           member["character"]["id"], 
+                           "Grandmaster",
+                           member["favoriteRaceP1"]]
+            us_players.append(playerstats)
+        except KeyError:
+            pass
 eu_players = update_playerstats(eu_ladderid_list, "eu")
+eu_gm_list = fromladder_getplayers(247542, "eu")
+for member in eu_gm_list:
+        try:
+            playerstats = [member["character"]["displayName"],
+                           member["character"]["id"], 
+                           "Grandmaster",
+                           member["favoriteRaceP1"]]
+            eu_players.append(playerstats)
+        except KeyError:
+            pass
 kr_players = update_playerstats(kr_ladderid_list, "kr")
 
 ######################################################
 
 #Saving player list to csv, creating a seperate file for each ladder
-us_players_data = pd.DataFrame(us_players)
-eu_players_data = pd.DataFrame(eu_players)
-kr_players_data = pd.DataFrame(kr_players)
+columnnames = ["Name", "playerid", "league", "FavoriteRace"]
+us_players_data = pd.DataFrame(us_players, columns=columnnames)
+#For us and eu server, add players in grandmasters leaderboard
+        
+eu_players_data = pd.DataFrame(eu_players, columns=columnnames)
+    
+#The korean server does not have a grandmaster leaderboard
+kr_players_data = pd.DataFrame(kr_players, columns=columnnames)
 us_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/us_players_S52.csv")
 eu_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/eu_players_S52.csv")
 kr_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/kr_players_S52.csv")
@@ -211,10 +240,23 @@ kr_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/kr_players_S52
 #We also do not want the code to terminate if there's error while requesting match history for one player
 
 #Create a dictionary for indexing with playerids later
-players_dict={}
-for player in test:
+us_players_dict={}
+eu_players_dict={}
+kr_players_dict={}
+
+for player in us_players_data:
     #the keys to the dictonary will be the playerids
-    players_dict[player[1]] = [player[0], player[2], player[3]]
+    us_players_dict[player[1]] = [player[0], player[2], player[3]]
+    
+for player in eu_players_data:
+    #the keys to the dictonary will be the playerids
+    eu_players_dict[player[1]] = [player[0], player[2], player[3]]
+
+for player in kr_players_data:
+    #the keys to the dictonary will be the playerids
+    kr_players_dict[player[1]] = [player[0], player[2], player[3]]
+
+servers = {"us":us_players_dict, "eu":eu_players_dict, "kr": kr_players_dict}
 
 #To set up the parralel requests, define getmatchhistory() that takes playerid and region as input
 #The function will return a list of matches that the player recently played
@@ -234,7 +276,7 @@ def getmatchhistory(playerid, region):
     if "200" in str(match_history_response):
         print("match history request successful for playerid = " +
               str(playerid))
-        return(players_dict[playerid] +
+        return(servers[region][playerid] +
                match_history_response.json()["matches"])
     #If the response is not 200 OK print an error message
     else:
@@ -246,13 +288,21 @@ def getmatchhistory(playerid, region):
 #running request at n_jobs=6 which means making 6 requests at the same time
 #Executing this part of the code will ramp up the cpu and internet usage
 #Running this part of code on my PC(Ryzen 5800, RTX3060) took about 3 hours
-data_matches = Parallel(n_jobs=6, 
+data_matches_us = Parallel(n_jobs=6, 
                         verbose=10)(delayed(getmatchhistory)
-                                    (player[1],"eu") for player in test)
+                                    (player[1],"us") for player in us_players_data)
+
+data_matches_eu = Parallel(n_jobs=6, 
+                        verbose=10)(delayed(getmatchhistory)
+                                    (player[1],"eu") for player in eu_players_data)
+
+data_matches_kr = Parallel(n_jobs=6, 
+                        verbose=10)(delayed(getmatchhistory)
+                                    (player[1],"kr") for player in kr_players_data)
 
 #####-------------------------------------------------------------------#####                                 
 
-#data_matches now stores a list of all returned values from getmatchhistory()
+#data_matches_<region> now stores a list of all returned values from getmatchhistory()
 #This following part of code reorganizes the data into a nice dataframe                                    
 data_full_matches_list = []
 for player in data_matches:
