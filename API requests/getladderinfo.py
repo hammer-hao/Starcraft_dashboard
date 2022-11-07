@@ -236,9 +236,9 @@ eu_players_data = pd.DataFrame(eu_players, columns=columnnames)
     
 #The korean server does not have a grandmaster leaderboard
 kr_players_data = pd.DataFrame(kr_players, columns=columnnames)
-us_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/us_players_S52.csv")
-eu_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/eu_players_S52.csv")
-kr_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/kr_players_S52.csv")
+us_players_data.to_csv("us_players_S52.csv")
+eu_players_data.to_csv("eu_players_S52.csv")
+kr_players_data.to_csv("kr_players_S52.csv")
 
 #Now we have details of each player and their playerids, we will not make a seperate request for each player to get their match history
 #This will result in making tens of thousands of requests in total
@@ -328,7 +328,7 @@ data_full_matches = pd.DataFrame(data_full_matches_list,
                                           "Type"],)
 #Saving matches data to csv:
 def save_matchdata():
-    data_full_matches.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/matches_data.csv")
+    data_full_matches.to_csv("matches_data.csv")
 save_matchdata()
 
 
