@@ -185,7 +185,7 @@ def update_playerstats(listed_ladderid, region):
                         playerslist.append(playerstats)
                 del division
             else:
-                print("subdiv does not exist for " + str(ladder_id(i)) + " tier " + str(idx2+1))
+                print("subdiv does not exist for " + str(ladder_id[i]) + " tier " + str(idx2+1))
     #return the final list consisting of all players in all leagues
     return(playerslist)
 
@@ -193,7 +193,7 @@ def update_playerstats(listed_ladderid, region):
 #Note: Running the following part of code will make *Hundreds* of individual api calls
 us_players = update_playerstats(us_ladderid_list, "us")
 eu_players = update_playerstats(eu_ladderid_list, "eu")
-kr_players = update_playerstats(kr_ladderid_list, "eu")
+kr_players = update_playerstats(kr_ladderid_list, "kr")
 
 ######################################################
 
