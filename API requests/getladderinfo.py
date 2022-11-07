@@ -34,7 +34,7 @@ region_id = {"us":1,
              "kr":3}
 ladder_id = {0:"Bronze", 1:"Silver", 2:"Gold", 3:"Platinum",
              4:"Diamond", 5:"Masters", 6:"Grandmaster"}
-token = {"access_token":"EUe7zpGALh34AbNXhfQg77CdgYI1TLxHyQ"}
+token = {"access_token":"EUrUiVHJusINLRsGFrLa1ktsci47NAEQry"}
 #####################################################
 
 #Defining a function that makes a API call to get ids for individual ladders given the league type
@@ -53,7 +53,7 @@ def getladder(season, region, leagueid, teamtype, queueid):
         )
     #save the response to league_response
     league_response = mrequest.get(league_url, params={"locale": "en_US",
-                    "access_token": "EUe7zpGALh34AbNXhfQg77CdgYI1TLxHyQ"})
+                    "access_token": "EUrUiVHJusINLRsGFrLa1ktsci47NAEQry"})
     #Check if the response is 200 OK
     if "200" in str(league_response):
         print("request successful for " + region + " league " + str(leagueid) +
@@ -179,7 +179,9 @@ def update_playerstats(listed_ladderid, region):
                                 playerstats = [member["character"]["displayName"],
                                                member["character"]["id"], 
                                                division,
-                                               member["favoriteRaceP1"]]
+                                               member["favoriteRaceP1"],
+                                               member["character"]["realm"],
+                                               member["character"]["region"]]
                             #If one characteristic is not specified, ignore and move on
                             except KeyError:
                                 pass
@@ -202,7 +204,9 @@ for member in us_gm_list:
             playerstats = [member["character"]["displayName"],
                            member["character"]["id"], 
                            "Grandmaster",
-                           member["favoriteRaceP1"]]
+                           member["favoriteRaceP1"],
+                           member["realm"],
+                           member["region"]]
             us_players.append(playerstats)
         except KeyError:
             pass
@@ -213,7 +217,9 @@ for member in eu_gm_list:
             playerstats = [member["character"]["displayName"],
                            member["character"]["id"], 
                            "Grandmaster",
-                           member["favoriteRaceP1"]]
+                           member["favoriteRaceP1"],
+                           member["realm"],
+                           member["region"]]
             eu_players.append(playerstats)
         except KeyError:
             pass
@@ -222,7 +228,7 @@ kr_players = update_playerstats(kr_ladderid_list, "kr")
 ######################################################
 
 #Saving player list to csv, creating a seperate file for each ladder
-columnnames = ["Name", "playerid", "league", "FavoriteRace"]
+columnnames = ["Name", "playerid", "league", "FavoriteRace", "realm", "region"]
 us_players_data = pd.DataFrame(us_players, columns=columnnames)
 #For us and eu server, add players in grandmasters leaderboard
         
@@ -239,36 +245,27 @@ kr_players_data.to_csv("C:/Users/hammerhao/OneDrive/Desktop/DS105/kr_players_S52
 #To speed up the process, a parallel module is used here
 #We also do not want the code to terminate if there's error while requesting match history for one player
 
-#Create a dictionary for indexing with playerids later
-us_players_dict={}
-eu_players_dict={}
-kr_players_dict={}
-
-for player in us_players_data:
-    #the keys to the dictonary will be the playerids
-    us_players_dict[player[1]] = [player[0], player[2], player[3]]
-    
-for player in eu_players_data:
-    #the keys to the dictonary will be the playerids
-    eu_players_dict[player[1]] = [player[0], player[2], player[3]]
-
-for player in kr_players_data:
-    #the keys to the dictonary will be the playerids
-    kr_players_dict[player[1]] = [player[0], player[2], player[3]]
-
-servers = {"us":us_players_dict, "eu":eu_players_dict, "kr": kr_players_dict}
-
 #To set up the parralel requests, define getmatchhistory() that takes playerid and region as input
 #The function will return a list of matches that the player recently played
 def getmatchhistory(playerid, region):
+    #get the plyer information from a specific dataframe:
+    if region == "us":
+        df = us_players_data
+    elif region == "eu":
+        df = eu_players_data
+    elif region == "kr":
+        df = kr_players_data
     #Generating API request url
     match_history_url= ("https://"+
                         str(region)+
                         ".api.blizzard.com/sc2/legacy/profile/"+
                         str(region_id[str(region)])+
-                        "/1/"+
+                        "/"+
+                        str(df.loc[df["playerid"]==str(playerid),"realm"])+
+                        "/"+
                         str(playerid)+
                         "/matches")
+    print(match_history_url)
     #Assigning the response to match_history_response
     match_history_response = mrequest.get(match_history_url, params=token)
     #Check if response is 200OK
@@ -276,7 +273,7 @@ def getmatchhistory(playerid, region):
     if "200" in str(match_history_response):
         print("match history request successful for playerid = " +
               str(playerid))
-        return(servers[region][playerid] +
+        return(df.loc[df["playerid"]==str(playerid),:] +
                match_history_response.json()["matches"])
     #If the response is not 200 OK print an error message
     else:
@@ -290,15 +287,15 @@ def getmatchhistory(playerid, region):
 #Running this part of code on my PC(Ryzen 5800, RTX3060) took about 3 hours
 data_matches_us = Parallel(n_jobs=6, 
                         verbose=10)(delayed(getmatchhistory)
-                                    (player[1],"us") for player in us_players_data)
+                                    (player[1],"us") for player in us_players)
 
 data_matches_eu = Parallel(n_jobs=6, 
                         verbose=10)(delayed(getmatchhistory)
-                                    (player[1],"eu") for player in eu_players_data)
+                                    (player[1],"eu") for player in eu_players)
 
 data_matches_kr = Parallel(n_jobs=6, 
                         verbose=10)(delayed(getmatchhistory)
-                                    (player[1],"kr") for player in kr_players_data)
+                                    (player[1],"kr") for player in kr_players)
 
 #####-------------------------------------------------------------------#####                                 
 
