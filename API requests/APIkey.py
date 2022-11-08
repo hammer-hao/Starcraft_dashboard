@@ -10,4 +10,4 @@ region_id = {"us":1,
              "kr":3}
 ladder_id = {0:"Bronze", 1:"Silver", 2:"Gold", 3:"Platinum",
              4:"Diamond", 5:"Masters", 6:"Grandmaster"}
-token = {"access_token":"EUrUiVHJusINLRsGFrLa1ktsci47NAEQry"}
+token = {"access_token":"<your api key here>"}
