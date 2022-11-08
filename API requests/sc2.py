@@ -7,6 +7,7 @@ Created on Tue Nov  8 16:30:30 2022
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+import ladders
 import references
 
 #import the retry module that allows us to resend requests and skip bad requests if necessary
@@ -74,3 +75,39 @@ def fromtiers_getladderid(data_of_entire_ladder, leagueid, tier):
     else:
         print("divisions do not exist for " + str (references.ladder_id[leagueid]) + 
               str(tier))
+        
+def update_playerstats(listed_ladderid, region):
+    playerslist=[]
+    #Loop through all the leagues
+    for i in range(6):
+        #loop through each division in the league and 
+        for idx2, subdiv in enumerate(listed_ladderid[i]):
+            division = (str(ladder_id[i]) + " " + str(idx2+1))
+            #loop through each individual ladder (~100 players)
+            if type(subdiv)==list:
+                for indivladderid in subdiv:
+                    #Call the fromladder_getplayers() function within the loop to get player details for individual ladder
+                    obj = ladders.ladder(indivladderid, region)
+                    members = obj.fromladder_getplayers()
+                    #Now loop through each player in that ladder, and create a list storing the details of each player
+                    try:
+                        for member in members:
+                            try:
+                                playerstats = [member["character"]["displayName"],
+                                               member["character"]["id"], 
+                                               division,
+                                               member["favoriteRaceP1"],
+                                               member["character"]["realm"],
+                                               member["character"]["region"]]
+                            #If one characteristic is not specified, ignore and move on
+                            except KeyError:
+                                pass
+                            #At the end, append the player's details to our list
+                            playerslist.append(playerstats)
+                    except TypeError:
+                        pass
+                del division
+            else:
+                print("subdiv does not exist for " + str(references.ladder_id[i]) + " tier " + str(idx2+1))
+    #return the final list consisting of all players in all leagues
+    return(playerslist)
