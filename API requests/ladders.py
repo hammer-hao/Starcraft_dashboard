@@ -17,10 +17,9 @@ mrequest.mount('http://', adapter)
 mrequest.mount('https://', adapter)
 
 class ladder:
-    def __init__(self, ladderid, server, tierid):
+    def __init__(self, ladderid, server):
         self.ladderid = ladderid
         self.server = server
-        self.tierid = tierid
     def fromladder_getplayers(self):
         ladder_url = ("https://"+
                       str(self.server)+
