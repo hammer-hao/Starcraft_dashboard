@@ -12,6 +12,7 @@ Michael Hao
 import pandas as pd #for data frames
 from joblib import Parallel, delayed # for running parallel requests
 import sc2
+import itertools
 
 #By calling update1v1ladder() on different servers and different seasons, we can update the current standings
 eu_ladder = sc2.update1v1ladder("eu", 52)
@@ -32,10 +33,10 @@ player_full_data.to_csv("players.csv")
 player_full_data = pd.read_csv("players.csv", index_col = 0)
 player_data = player_full_data.values.tolist()
 
-
 data_matches = Parallel(n_jobs=6, 
                         verbose=10)(delayed(sc2.getmatchhistory)
-                                    (player) for player in player_data)                                
+                                    (player) for player in player_data)
 
-
-
+full_matches = [match for player in data_matches if player is not None for match in player]
+data_full_matches = pd.DataFrame(full_matches)
+data_full_matches.to_csv("matchesdata.csv")
