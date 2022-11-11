@@ -27,10 +27,17 @@ player_data = sc2.update_playerstats(ladderid_list)
 #Saving player list to csv
 player_full_data = pd.DataFrame(player_data, columns = ["playerid", "name", "realm", "region",
                                      "mmr", "league"])
+
+#---------------------11.11.2022, added player race, wins, and losses-----------------#
+ladderid_list = pd.read_csv("ladder.csv", index_col=0).values.tolist()
+player_wl_data = sc2.update_playerWL(ladderid_list)
+
 player_full_data.to_csv("players.csv")
 
 player_full_data = pd.read_csv("players.csv", index_col = 0)
 player_data = player_full_data.values.tolist()
+for player in player_data:
+    player = player + player_wl_data[player[0]]
 
 data_matches = Parallel(n_jobs=6, 
                         verbose=10)(delayed(sc2.getmatchhistory)

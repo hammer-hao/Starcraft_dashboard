@@ -65,7 +65,8 @@ class ladder:
                                         player_realm,
                                         player_region,
                                         player_mmr,
-                                        str(str(self.league)+" "+str(self.tier))]
+                                        str(str(self.league)+" "+str(self.tier)),
+                                        ]
                         playerlist.append(player_details)
                 return playerlist
             else:
@@ -75,3 +76,31 @@ class ladder:
         else:
             print("error while retrieving initial match data from " + str(self.ladderid)+" :")
             print(ladder_response)
+    def getwinloss(self):
+        ladder_url = ("https://"+
+                      str(self.server)+
+                      ".api.blizzard.com/sc2/legacy/ladder/"+
+                      str(APIkey.region_id[str(self.server)])+
+                      "/"+
+                      str(self.ladderid)
+            )
+        winloss_response = mrequest.get(ladder_url, params=APIkey.token)
+        if winloss_response.status_code == 200:
+            print("request successful for ladderid " + str(self.ladderid))
+            allplayers = winloss_response.json()["ladderMembers"]
+            playerwinls = []
+            for player in allplayers:
+                    playerid = player["character"]["id"]
+                    wins = player["wins"]
+                    losses = player["losses"]
+                    try:
+                        race = player["favoriteRaceP1"]
+                    except KeyError:
+                        race = "Unknown"
+                    player_dict = {playerid: [wins, losses, race]}
+                    playerwinls.append(player_dict)
+            return playerwinls
+        else:
+            print("error while requesting data for laderid "+str(self.ladderid))
+            print(winloss_response)
+            
