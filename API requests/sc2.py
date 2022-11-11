@@ -18,17 +18,6 @@ adapter = HTTPAdapter(max_retries=retry)
 mrequest.mount('http://', adapter)
 mrequest.mount('https://', adapter)
 
-
-#11.6.2022: Note that access tokens are temporary and need to be changed to run the code by logging into the battle.net account.
-#Creating dictionaries to convert battle.net terms to english
-region_id = {"us":1,
-             "eu":2,
-             "kr":3}
-ladder_id = {0:"Bronze", 1:"Silver", 2:"Gold", 3:"Platinum",
-             4:"Diamond", 5:"Masters", 6:"Grandmaster"}
-token = {"access_token":"EUrUiVHJusINLRsGFrLa1ktsci47NAEQry"}
-#####################################################
-
 #Defining a function that makes a API call to get ids for individual ladders given the league type
 def getladder(season, region, leagueid, teamtype, queueid):
     #for specifics on this part, see the battle.net API documentations on starcraft 2
@@ -49,7 +38,7 @@ def getladder(season, region, leagueid, teamtype, queueid):
     #Check if the response is 200 OK
     if league_response.status_code==200:
         print("request successful for " + region + " league " + str(leagueid) +
-              str(ladder_id[leagueid]))
+              str(APIkey.ladder_id[leagueid]))
         return(league_response.json()["tier"])
     #If the response is not 200 OK, print an error message:
     else:
