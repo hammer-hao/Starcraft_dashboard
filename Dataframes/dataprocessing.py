@@ -15,6 +15,9 @@ players_df = pd.read_csv('player_full.csv', index_col=0)
 players_df = players_df.drop_duplicates()
 #Dropping players with unknown wins and losses
 players_df = players_df[players_df['wins']!='unknown'][:]
+#dropping players with abserd mmr
+players_df = players_df[players_df['mmr']>100][:]
+players_df = players_df[players_df['mmr']<8000][:]
 #converting wins and losses to integers
 players_df['wins']=players_df['wins'].astype('int')
 players_df['losses']=players_df['losses'].astype('int')
@@ -23,7 +26,21 @@ players_df['totalgames']=players_df['wins']+players_df['losses']
 #dropping players with total games less than 10
 players_df = players_df[players_df['totalgames']>=10][:]
 players_df['winrate']=players_df['wins']/players_df['losses']
+#remapping region
+region_dict = {
+    1:'us',
+    2:'eu',
+    3:'kr'
+}
+players_df['region'].replace(region_dict, inplace=True)
 
 eu_df = players_df[players_df['region']==2][:]
 kr_df = players_df[players_df['region']==3][:]
 us_df = players_df[players_df['region']==1][:]
+
+ggplot(kr_df, aes(x='mmr')) + geom_histogram(binwidth=120, color="blue", fill="lightblue") + geom_density(alpha=.2, fill="#FF6666") + theme_bw()
+
+ggplot(us_df, aes(x='mmr')) + geom_histogram(binwidth=120, color="blue", fill="lightblue") + theme_bw()
+ggplot(eu_df, aes(x='mmr')) + geom_histogram(binwidth=120, color="blue", fill="lightblue") + theme_bw()
+
+ggplot(players_df, aes(x='mmr', fill='region')) + geom_density(alpha=.3) + geom_vline(us_df, aes(xintercept='mmr.mean()'), color='blue', linetype="dashed", size=1) + geom_vline(kr_df, aes(xintercept='mmr.mean()'), color='green', linetype="dashed", size=1) +geom_vline(eu_df, aes(xintercept='mmr.mean()'), color='red', linetype="dashed", size=1)
