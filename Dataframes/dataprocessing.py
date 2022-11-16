@@ -34,13 +34,18 @@ region_dict = {
 }
 players_df['region'].replace(region_dict, inplace=True)
 
-eu_df = players_df[players_df['region']==2][:]
-kr_df = players_df[players_df['region']==3][:]
-us_df = players_df[players_df['region']==1][:]
-
-ggplot(kr_df, aes(x='mmr')) + geom_histogram(binwidth=120, color="blue", fill="lightblue") + geom_density(alpha=.2, fill="#FF6666") + theme_bw()
-
-ggplot(us_df, aes(x='mmr')) + geom_histogram(binwidth=120, color="blue", fill="lightblue") + theme_bw()
-ggplot(eu_df, aes(x='mmr')) + geom_histogram(binwidth=120, color="blue", fill="lightblue") + theme_bw()
-
-ggplot(players_df, aes(x='mmr', fill='region')) + geom_density(alpha=.3) + geom_vline(us_df, aes(xintercept='mmr.mean()'), color='blue', linetype="dashed", size=1) + geom_vline(kr_df, aes(xintercept='mmr.mean()'), color='green', linetype="dashed", size=1) +geom_vline(eu_df, aes(xintercept='mmr.mean()'), color='red', linetype="dashed", size=1)
+eu_df = players_df[players_df['region']=='eu'][:]
+kr_df = players_df[players_df['region']=='kr'][:]
+us_df = players_df[players_df['region']=='us'][:]
+figure1 = (ggplot(players_df, aes(x='mmr', fill='region')) + 
+geom_density(alpha=.3) + geom_vline(us_df, aes(xintercept='mmr.mean()'), color='blue', linetype="dashed", size=1) + 
+geom_vline(kr_df, aes(xintercept='mmr.mean()'), color='green', linetype="dashed", size=1) +
+geom_vline(eu_df, aes(xintercept='mmr.mean()'), color='red', linetype="dashed", size=1) +
+theme_bw()
+)
+players_df = players_df[players_df['totalgames'] < 1000][:]
+figure2 = (ggplot(players_df, aes(x='totalgames')) +
+           geom_histogram(binwidth=10, color="blue", fill="lightblue") +
+           geom_density(alpha=.2, fill="#FF6666") +
+           theme_bw()
+           )
