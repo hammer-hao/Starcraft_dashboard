@@ -19,14 +19,16 @@ us_ladder = sc2.update1v1ladder("us", 52)
 kr_ladder = sc2.update1v1ladder("kr", 52)
 
 #Calling fromladderlist in the sc2 module to create a full list of ladderids
-ladderid_list= sc2.formladderlist(eu_ladder, "eu") + sc2.formladderlist(us_ladder, "us") + sc2.formladderlist(kr_ladder, "kr")
+ladderid_list= (sc2.formladderlist(eu_ladder, "eu") + 
+                sc2.formladderlist(us_ladder, "us") +
+                sc2.formladderlist(kr_ladder, "kr"))
+
+#save the ladderid list to ladder.csv
 pd.DataFrame(ladderid_list).to_csv('ladder.csv')
 
-player_data = sc2.update_playerstats(ladderid_list)
-
-#Saving player list to csv
-player_full_data = pd.DataFrame(player_data, columns = ["playerid", "name", "realm", "region",
-                                     "mmr", "league"])
+#use the ladderidlist to update player stats and dave it to player_full_data
+player_full_data = pd.DataFrame(sc2.update_playerstats(ladderid_list), 
+                                columns = ["playerid", "name", "realm", "region", "mmr", "league"])
 
 #---------------------11.11.2022, added player race, wins, and losses-----------------#
 ladderid_list = pd.read_csv("ladder.csv", index_col=0).values.tolist()
@@ -36,8 +38,21 @@ player_full_data.to_csv("players.csv")
 
 player_full_data = pd.read_csv("players.csv", index_col = 0)
 player_data = player_full_data.values.tolist()
+player_wl = {}
+for player in player_wl_data:
+    player_wl.update(player)
+
+player_data_wl=[]
 for player in player_data:
-    player = player + player_wl_data[player[0]]
+    try:
+        player = player + player_wl[str(player[0])]
+    except KeyError:
+        player = player + ["unknown", "unknown", "unknown"]
+    player_data_wl.append(player)
+
+player_full = pd.DataFrame(player_data_wl, columns=["playerid", "name", "realm", "region",
+                                                    "mmr", "league", "wins", "losses", "race"])
+player_full.to_csv("player_full.csv")
 
 data_matches = Parallel(n_jobs=6, 
                         verbose=10)(delayed(sc2.getmatchhistory)
