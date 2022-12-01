@@ -1,0 +1,3 @@
+/venv
+/Dataframes/.env
+*.pyc
