@@ -7,9 +7,7 @@ Created on Tue Nov  8 16:30:30 2022
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-import ladders
-import players
-import APIkey
+from sc2objects import ladders, players, APIkey
 
 #import the retry module that allows us to resend requests and skip bad requests if necessary
 mrequest = requests.Session()
@@ -89,6 +87,17 @@ def update_playerstats(ladderidlist):
         thisladder = ladders.ladder(ladder[0], ladder[3], ladder[1], ladder[2])
         thisplayerlist = thisladder.getplayers()
         playerlist = playerlist + thisplayerlist
+    return playerlist
+
+def update_playerWL(ladderidlist):
+    playerlist = []
+    for ladder in ladderidlist:
+        thisladder = ladders.ladder(ladder[0], ladder[3], ladder[1], ladder[2])
+        thisplayerlist = thisladder.getwinloss()
+        try:
+            playerlist = playerlist + thisplayerlist
+        except TypeError:
+            pass
     return playerlist
 
 def getmatchhistory(player_entry):
