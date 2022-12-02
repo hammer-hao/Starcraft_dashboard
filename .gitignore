@@ -1,3 +1,5 @@
 /venv
 /Dataframes/.env
 *.pyc
+/Dataframes/players_s52.csv
+/Dataframes/matches.csv
