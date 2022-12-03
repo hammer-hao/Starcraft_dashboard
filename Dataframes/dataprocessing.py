@@ -54,6 +54,7 @@ matches_forpairing=matches_full[matches_full['map'].isin(map_list)]
 def pairmatches(winner_df, loser_df):
     #Creating columns for opponents
     winner_df['opponentid']=""
+    winner_df['opponentname']=""
     winner_df['opponentrace']=""
     #reseting index for the for loop
     winner_df.reset_index(drop=True, inplace=True)
@@ -70,11 +71,13 @@ def pairmatches(winner_df, loser_df):
         #assign the opponent if we found one
         try:
             winner_df.iat[i, 14]=loser.iloc[0]['playerid']
-            winner_df.iat[i, 15]=loser.iloc[0]['race']
+            winner_df.iat[i, 15]=loser.iloc[0]['name']
+            winner_df.iat[i, 16]=loser.iloc[0]['race']
         #return unknown if cant find opponent
         except IndexError:
             winner_df.iat[i, 14]='unknown'
             winner_df.iat[i, 15]='unknown'
+            winner_df.iat[i, 16]='unknown'
 
 def pairallmatches(matchesdf, maplist):
     winners=matchesdf[matches_forpairing['result']=='Win']
@@ -86,14 +89,14 @@ def pairallmatches(matchesdf, maplist):
         pairmatches(thismap_winners, thismap_losers)
         pairmatches(thismap_losers, thismap_winners)
         thismap=pd.concat([thismap_winners, thismap_losers])
-        paireddf=pd.concat(paireddf, thismap)
+        paireddf=pd.concat([paireddf, thismap])
     return paireddf
 
 matches_paired=pairallmatches(matches_forpairing, map_list)
 
 #saving the processed matches
 matches_full.to_csv('processedmatches.csv')
-
+matches_paired.to_csv('pairedmatches.csv')
 
 #--------------Players data processing--------------------------------------
 
