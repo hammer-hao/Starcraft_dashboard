@@ -59,6 +59,12 @@ figure2 = (ggplot(players_df, aes(x='totalgames')) +
            geom_density(alpha=.2, fill="#FF6666") +
            theme_bw()
            )
+figure2_log = (ggplot(players_df, aes(x='totalgames')) +
+           geom_histogram(binwidth=10, color="blue", fill="lightblue") +
+           geom_density(alpha=.2, fill="#FF6666") +
+           theme_bw() +
+           scale_y_log10()
+           )
 
 #Graph 4: Qing's bar graph
 df = pd.DataFrame({
