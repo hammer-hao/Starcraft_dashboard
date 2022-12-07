@@ -5,6 +5,7 @@ Created on Wed Nov 16 23:39:23 2022
 @author: hammerhao
 """
 import pandas as pd
+import numpy as np
 
 #--------------Matches data processing and merging
 
@@ -61,4 +62,54 @@ players_df['totalgames']=players_df['wins']+players_df['losses']
 players_df = players_df[players_df['totalgames']>=10][:]
 players_df['winrate']=players_df['wins']/players_df['totalgames']
 
+
+#fixing the leagues
+def changeleague(df, lista, listb, listc):
+    conditions = []
+    #region1
+    conditions.append((df['region'] == 1) & (df['mmr'] < lista[0]))
+    conditions.append((df['region'] == 1) & (df['mmr'] >= lista[18]))
+    for i in range(18):
+        conditions.append((df['region'] == 1) & (df['mmr'] >= lista[i]) & (df['mmr'] < lista[i+1]))
+    #region2    
+    conditions.append((df['region'] == 2) & (df['mmr'] < listb[0]))
+    conditions.append((df['region'] == 2) & (df['mmr'] >= listb[18]))
+    for i in range(18):
+        conditions.append((df['region'] == 2) & (df['mmr'] >= listb[i]) & (df['mmr'] < listb[i+1]))
+    #region3
+    conditions.append((df['region'] == 3) & (df['mmr'] < listc[0]))
+    conditions.append((df['region'] == 3) & (df['mmr'] >= listc[18]))
+    for i in range(18):
+        conditions.append((df['region'] == 3) & (df['mmr'] >= listc[i]) & (df['mmr'] < listc[i+1]))
+    
+    choices = ['under','Grandmaster','Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3','Gold 2',
+               'Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1','Master 3','Master 2',
+               'Master 1','under','Grandmaster','Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3',
+               'Gold 2','Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1','Master 3','Master 2',
+               'Master 1','under','Grandmaster','Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3',
+               'Gold 2','Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1','Master 3','Master 2',
+               'Master 1']
+    df['league'] = np.select(conditions, choices)
+
+#combine league into general categories
+def combine_leagues(df):
+    df['league_combined'] = df['league'].replace('Master 1','Master')
+    df['league_combined'] = df['league_combined'].replace('Master 2','Master')
+    df['league_combined'] = df['league_combined'].replace('Master 3','Master')
+    df['league_combined'] = df['league_combined'].replace('Diamond 1','Diamond')
+    df['league_combined'] = df['league_combined'].replace('Diamond 2','Diamond')
+    df['league_combined'] = df['league_combined'].replace('Diamond 3','Diamond')
+    df['league_combined'] = df['league_combined'].replace('Gold 1','Gold')
+    df['league_combined'] = df['league_combined'].replace('Gold 2','Gold')
+    df['league_combined'] = df['league_combined'].replace('Gold 3','Gold')
+    df['league_combined'] = df['league_combined'].replace('Silver 1','Silver')
+    df['league_combined'] = df['league_combined'].replace('Silver 2','Silver')
+    df['league_combined'] = df['league_combined'].replace('Silver 3','Silver')
+    df['league_combined'] = df['league_combined'].replace('Bronze 1','Bronze')
+    df['league_combined'] = df['league_combined'].replace('Bronze 2','Bronze')
+    df['league_combined'] = df['league_combined'].replace('Bronze 3','Bronze')
+    df['league_combined'] = df['league_combined'].replace('Platinum 1','Platinum')
+    df['league_combined'] = df['league_combined'].replace('Platinum 2','Platinum')
+    df['league_combined'] = df['league_combined'].replace('Platinum 3','Platinum')
+    
 players_df.to_csv('processedplayers.csv')
