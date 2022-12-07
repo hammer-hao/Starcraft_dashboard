@@ -53,6 +53,9 @@ geom_vline(PROTOSS_df, aes(xintercept='mmr.mean()'), color='red', linetype="dash
 theme_bw()
 )
 
+#overall distribution
+figure2_o = (ggplot(race_df, aes(x='mmr', fill='race')) + geom_density(alpha=.3) + geom_vline(race_df, aes(xintercept='mmr.mean()'), color='blue', linetype="dashed", size=1))
+
 #Graph 3: Distribution of total number of games played
 figure2 = (ggplot(players_df, aes(x='totalgames')) +
            geom_histogram(binwidth=10, color="blue", fill="lightblue") +
