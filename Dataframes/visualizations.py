@@ -83,6 +83,31 @@ figure2=(ggplot(df, aes(x='Race', y='Ratio', fill='category'))
  + lims(y=(0, 1.2))
 )
 
+#Graph 5: Win rate against MMR (overall and by region)
+def rainbow_distribution(dfz, reg = 0):
+    if reg == 0:
+        df = dfz
+    else:
+        df = dfz[dfz.region == reg]
+    g = (ggplot(df)
+         + aes(x='mmr',y='winrate', color = df.league_combined)
+         + geom_point(size = 0.00001)
+         + scale_color_manual(['red','blue','yellow','violet','indigo','green','orange','black'])
+         + labs(x = "MMR", y = "Win Rate", shape = "League", color = "League", title = "Win Rate against MMR")
+        )
+    print(g)
+rainbow_df = players_df[players_df.league_combined != 'under']
+
+#overall distribution
+rainbow_distribution(rainbow_df)
+#region 1
+rainbow_distribution(rainbow_df,1)
+#region 2
+rainbow_distribution(rainbow_df,2)
+#region 3
+rainbow_distribution(rainbow_df,3)
+
+
 #----------------------------Matches Datafram Visualizations-------------------------
 
 matches_full=pd.read_csv('processedmatches.csv')
