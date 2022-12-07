@@ -128,9 +128,18 @@ def changeleague(df, lista, listb, listc):
                'Master 1']
     df['league'] = np.select(conditions, choices)
 
-#Michael:
-#Tried the following, should work but didnt
-changeleague(players_df, boundaries[0], boundaries[1], boundaries[2])
+#Fixing the leagues (Michael version)
+def fixleagues(playersdf, boundariesls):
+    leaguenames=['Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3','Gold 2',
+               'Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1',
+               'Masters 3','Masters 2', 'Masters 1']
+    for i in range(2):
+        this_boundaries=boundariesls[i]
+        for j in range(17):
+            playersdf.loc[(playersdf['mmr']>this_boundaries[j]) & (playersdf['region']==(i+1)), 'league']=leaguenames[j]
+        playersdf.loc[(playersdf['mmr']<boundariesls[i][0]) & (playersdf['region']==(i+1)), 'league']='under'
+
+fixleagues(players_df, boundaries)
 
 #combine league into general categories
 def combine_leagues(df):
