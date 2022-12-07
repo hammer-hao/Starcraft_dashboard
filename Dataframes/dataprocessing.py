@@ -6,6 +6,8 @@ Created on Wed Nov 16 23:39:23 2022
 """
 import pandas as pd
 import numpy as np
+import requests
+from sc2objects import APIkey
 
 #--------------Matches data processing and merging
 
@@ -62,6 +64,41 @@ players_df['totalgames']=players_df['wins']+players_df['losses']
 players_df = players_df[players_df['totalgames']>=10][:]
 players_df['winrate']=players_df['wins']/players_df['totalgames']
 
+#getting boundaries from the Battle.net API. The function returns 18 mmr values for the mmr floor for each range. 
+#Note that grandmasters league is not bugged and does not need to be fixed. Any grandmaster player shall remain as grandmaster in the players dataframe.
+def getboundaries(season, region):
+    #Creating emtpy list to store all boundaries in this server
+    boundarieslist=[]
+    #Looping from Bronze(0) to Masters(5)
+    for i in range(6):
+        #Generating URL
+        url = ('https://'+ 
+               str(APIkey.region_idr[region]) +
+               '.api.blizzard.com/data/sc2/league/' +
+               str(season) +
+               '/201/0/'+str(i))
+        #Creating requests session
+        league_response=requests.get(url, params=APIkey.token)
+        #Checking if response is 200 OK
+        if league_response.status_code==200:
+            #Pring url to show that request was successful
+            print(url)
+            tier=league_response.json()['tier']
+            #Extracting mmr floor of each tier
+            thisleague_tiers=[tier[2]['min_rating'], tier[1]['min_rating'], tier[0]['min_rating']]
+            boundarieslist=boundarieslist+thisleague_tiers
+        else:
+            print('error retrieving boundaries for leauge ' + str(i))
+            print(league_response)
+    #seems like the us and eu's bronze borders are bugged. This is not the best fix but we will create arbitrary boundries from here:
+    #https://burnysc2.github.io/MMR-Ranges/
+    if (region==1 or region==2):
+        boundarieslist[0]=1045
+        boundarieslist[1]=1283
+        boundarieslist[2]=1522
+    return boundarieslist
+
+boundaries=[getboundaries(52,1), getboundaries(52,2), getboundaries(52,3)]
 
 #fixing the leagues
 def changeleague(df, lista, listb, listc):
@@ -91,25 +128,19 @@ def changeleague(df, lista, listb, listc):
                'Master 1']
     df['league'] = np.select(conditions, choices)
 
+#Michael:
+#Tried the following, should work but didnt
+changeleague(players_df, boundaries[0], boundaries[1], boundaries[2])
+
 #combine league into general categories
 def combine_leagues(df):
-    df['league_combined'] = df['league'].replace('Master 1','Master')
-    df['league_combined'] = df['league_combined'].replace('Master 2','Master')
-    df['league_combined'] = df['league_combined'].replace('Master 3','Master')
-    df['league_combined'] = df['league_combined'].replace('Diamond 1','Diamond')
-    df['league_combined'] = df['league_combined'].replace('Diamond 2','Diamond')
-    df['league_combined'] = df['league_combined'].replace('Diamond 3','Diamond')
-    df['league_combined'] = df['league_combined'].replace('Gold 1','Gold')
-    df['league_combined'] = df['league_combined'].replace('Gold 2','Gold')
-    df['league_combined'] = df['league_combined'].replace('Gold 3','Gold')
-    df['league_combined'] = df['league_combined'].replace('Silver 1','Silver')
-    df['league_combined'] = df['league_combined'].replace('Silver 2','Silver')
-    df['league_combined'] = df['league_combined'].replace('Silver 3','Silver')
-    df['league_combined'] = df['league_combined'].replace('Bronze 1','Bronze')
-    df['league_combined'] = df['league_combined'].replace('Bronze 2','Bronze')
-    df['league_combined'] = df['league_combined'].replace('Bronze 3','Bronze')
-    df['league_combined'] = df['league_combined'].replace('Platinum 1','Platinum')
-    df['league_combined'] = df['league_combined'].replace('Platinum 2','Platinum')
-    df['league_combined'] = df['league_combined'].replace('Platinum 3','Platinum')
-    
+    league_comb={'Masters 1': 'Masters', 'Masters 2': 'Masters', 'Masters 3': 'Masters',
+                 'Diamond 1': 'Diamond', 'Diamond 2': 'Diamond', 'Diamond 3': 'Diamond',
+                 'Gold 1': 'Gold', 'Gold 2': 'Gold', 'Gold 3': 'Gold',
+                 'Silver 1': 'Silver', 'Silver 2': 'Silver', 'Silver 3': 'Silver',
+                 'Bronze 1': 'Bronze', 'Bronze 2': 'Bronze', 'Bronze 3': 'Bronze'}
+    df['league_combined']=df.replace({'league': league_comb})['league']
+
+
+
 players_df.to_csv('processedplayers.csv')
