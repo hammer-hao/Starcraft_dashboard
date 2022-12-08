@@ -4,11 +4,23 @@ This is a group project that explores aspects of the Starcraft II ladder, mmr, a
 
 # How to use
 
-1. Go to the Blizzard Battle.net API and register an account.
-2. Get your own client ID and secret. Save them into a ```.env``` file under /API requests/ in the following format:
+1. Clone the repository to your local machine
+2. Go to the Blizzard Battle.net API and register an account.
+3. Get your own client ID and secret. Save them into a ```.env``` file under /API requests/ in the following format:
 ```
 CLIENTID=<your client id>
 SECRET=<your client secret>
 ```
-3. Clone the repository to your local machine
-4. Save your APIkey.py to APIrequests/sc2objects
+4. Set up your own mySQL server. This can be done on a local machine or using a web service provider like AWS. Once the database server is set up, input its credentials into a ```.env``` file under ```dataframes/``` in the following format:
+```
+HOSTNAME=<path to the database>
+DBNAME=<your database name>
+DBUSERNAME=<your database username>
+PASSWORD=<your database password>
+```
+5. Create a virtual environment in Python.
+6. Install the required packages:
+```
+pip install -r requirements.txt
+```
+7. Run ```APIrequests.py``` under the /API requests/ folder.
