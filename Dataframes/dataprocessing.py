@@ -133,13 +133,17 @@ def fixleagues(playersdf, boundariesls):
     leaguenames=['Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3','Gold 2',
                'Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1',
                'Masters 3','Masters 2', 'Masters 1']
+    playersdf['grandmaster']=''
     for i in range(2):
         this_boundaries=boundariesls[i]
+        playersdf.loc[(playersdf['league']=='Grandmaster 1') & (playersdf['region']==(i+1)), 'grandmaster']=1
         for j in range(17):
             playersdf.loc[(playersdf['mmr']>this_boundaries[j]) & (playersdf['region']==(i+1)), 'league']=leaguenames[j]
         playersdf.loc[(playersdf['mmr']<boundariesls[i][0]) & (playersdf['region']==(i+1)), 'league']='under'
-
+        playersdf.loc[playersdf['grandmaster']==1, 'league']='Grandmaster'
+        
 fixleagues(players_df, boundaries)
+players_df = players_df.drop(columns=['grandmaster'])
 
 #combine league into general categories
 def combine_leagues(df):
