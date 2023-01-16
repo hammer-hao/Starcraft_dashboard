@@ -24,3 +24,7 @@ PASSWORD=<your database password>
 pip install -r requirements.txt
 ```
 7. Run ```APIrequests.py``` under the /API requests/ folder.
+
+```
+python3 APIrequests.py
+```
