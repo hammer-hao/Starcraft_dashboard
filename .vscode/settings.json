@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./venv/Lib/site-packages/jedi/third_party/typeshed/third_party/2and3"
+    ]
+}

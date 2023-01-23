@@ -8,9 +8,19 @@ import pandas as pd
 from tqdm import tqdm
 import numpy as np
 import requests
-from sc2objects import APIkey
+from sqlalchemy import create_engine
+from SC2 import APIkey
+
+hostname=APIkey.dbhostname
+dbname=APIkey.dbname
+uname=APIkey.dbusername
+pwd=APIkey.password
+
+engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}"
+				.format(host=hostname, db=dbname, user=uname, pw=pwd))
 
 def processmatches(dflist):
+    
     #--------------Matches data processing and merging
     #import original matches data
     matches_part = dflist[1]
@@ -62,7 +72,7 @@ def processmatches(dflist):
         #reseting index for the for loop
         winner_df.reset_index(drop=True, inplace=True)
         #interate over rows in the winners dataframe
-        for i, row in tqdm(winner_df.iterrows()):
+        for i, row in tqdm(winner_df.iterrows(), total=int(winner_df.shape[0]), desc='pairing matches'):
             #Find all matches within the three minutes range
             losers=loser_df[loser_df['date'].between(row[10]-180,row[10]+180)]
             #eliminate matches that are in another server
@@ -98,8 +108,8 @@ def processmatches(dflist):
     matches_paired=pairallmatches(matches_forpairing, map_list)
 
     #saving the processed matches
-    matches_full.to_csv('processedmatches.csv')
-    matches_paired.to_csv('pairedmatches.csv')
+    matches_full.to_sql('processedmatches', engine, if_exists='replace', index=False)
+    matches_paired.to_sql('pairedmatches', engine, if_exists='replace', index=False)
 
     #--------------Players data processing--------------------------------------
 
@@ -156,37 +166,10 @@ def processmatches(dflist):
             boundarieslist[2]=1522
         return boundarieslist
 
-    boundaries=[getboundaries(52,1), getboundaries(52,2), getboundaries(52,3)]
+    seasn=APIkey.season
+    boundaries=[getboundaries(seasn,1), getboundaries(seasn,2), getboundaries(seasn,3)]
 
-    #fixing the leagues
-    def changeleague(df, lista, listb, listc):
-        conditions = []
-        #region1
-        conditions.append((df['region'] == 1) & (df['mmr'] < lista[0]))
-        conditions.append((df['region'] == 1) & (df['mmr'] >= lista[18]))
-        for i in range(18):
-            conditions.append((df['region'] == 1) & (df['mmr'] >= lista[i]) & (df['mmr'] < lista[i+1]))
-        #region2    
-        conditions.append((df['region'] == 2) & (df['mmr'] < listb[0]))
-        conditions.append((df['region'] == 2) & (df['mmr'] >= listb[18]))
-        for i in range(18):
-            conditions.append((df['region'] == 2) & (df['mmr'] >= listb[i]) & (df['mmr'] < listb[i+1]))
-        #region3
-        conditions.append((df['region'] == 3) & (df['mmr'] < listc[0]))
-        conditions.append((df['region'] == 3) & (df['mmr'] >= listc[18]))
-        for i in range(18):
-            conditions.append((df['region'] == 3) & (df['mmr'] >= listc[i]) & (df['mmr'] < listc[i+1]))
-        
-        choices = ['under','Grandmaster','Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3','Gold 2',
-                'Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1','Master 3','Master 2',
-                'Master 1','under','Grandmaster','Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3',
-                'Gold 2','Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1','Master 3','Master 2',
-                'Master 1','under','Grandmaster','Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3',
-                'Gold 2','Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1','Master 3','Master 2',
-                'Master 1']
-        df['league'] = np.select(conditions, choices)
-
-    #Fixing the leagues (Michael version)
+    #Fixing the leagues
     def fixleagues(playersdf, boundariesls):
         leaguenames=['Bronze 3','Bronze 2','Bronze 1','Silver 3','Silver 2','Silver 1','Gold 3','Gold 2',
                 'Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1',
@@ -212,4 +195,4 @@ def processmatches(dflist):
                     'Bronze 1': 'Bronze', 'Bronze 2': 'Bronze', 'Bronze 3': 'Bronze'}
         df['league_combined']=df.replace({'league': league_comb})['league']
 
-    players_df.to_csv('processedplayers.csv')
+    players_df.to_sql('processedplayers', engine, if_exists='replace', index=False)

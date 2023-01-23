@@ -6,8 +6,9 @@ Created on Tue Nov  8 16:30:30 2022
 """
 import requests
 from requests.adapters import HTTPAdapter
+from tqdm import tqdm
 from requests.packages.urllib3.util.retry import Retry
-from sc2objects import ladders, players, APIkey
+from SC2 import ladders, players, APIkey
 
 #import the retry module that allows us to resend requests and skip bad requests if necessary
 mrequest = requests.Session()
@@ -31,8 +32,7 @@ def getladder(season, region, leagueid, teamtype, queueid):
                   str(leagueid)
         )
     #save the response to league_response
-    league_response = mrequest.get(league_url, params={"locale": "en_US",
-                    "access_token": "EUrUiVHJusINLRsGFrLa1ktsci47NAEQry"})
+    league_response = mrequest.get(league_url, params=APIkey.token)
     #Check if the response is 200 OK
     if league_response.status_code==200:
         print("request successful for " + region + " league " + str(leagueid) +
@@ -83,23 +83,17 @@ def fromtiers_getladderid(data_of_entire_ladder, leagueid, tier):
         
 def update_playerstats(ladderidlist):
     playerlist = []
-    for ladder in ladderidlist:
+    pbar = tqdm(ladderidlist, total=len(ladderidlist))
+    for ladder in pbar:
+        pbar.set_description("Processing ladderid=%s" % ladder[0])
         thisladder = ladders.ladder(ladder[0], ladder[3], ladder[1], ladder[2])
         thisplayerlist = thisladder.getplayers()
-        playerlist = playerlist + thisplayerlist
-    return playerlist
-
-def update_playerWL(ladderidlist):
-    playerlist = []
-    for ladder in ladderidlist:
-        thisladder = ladders.ladder(ladder[0], ladder[3], ladder[1], ladder[2])
-        thisplayerlist = thisladder.getwinloss()
         try:
             playerlist = playerlist + thisplayerlist
         except TypeError:
             pass
     return playerlist
-
+    
 def getmatchhistory(player_entry):
     player = players.player(player_entry[0], player_entry[1], player_entry[5],
                             player_entry[4], player_entry[3], player_entry[2])

@@ -1,3 +1,6 @@
-from APIrequests import APIrequests
-from Dataframes import dataprocessing, visualizations
+from SC2 import APIrequests, dataprocessing
+
+fetcheddata = APIrequests.getplayersandmatchdata()
+
+dataprocessing.processmatches(fetcheddata)
 

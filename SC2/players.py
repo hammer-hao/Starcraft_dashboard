@@ -5,7 +5,7 @@ This scripe defines class of players and their related methods
 
 @author: hammerhao
 """
-from sc2objects import APIkey
+from SC2 import APIkey
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
