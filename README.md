@@ -29,12 +29,13 @@ DBUSERNAME=<your database username>
 PASSWORD=<your database password>
 ```
 
-7. Execute ```task.py``` under the /API requests/ folder:
+## Running the code
+1. Once everything is set up, simply execute ```task.py``` under the /API requests/ folder:
 ```
 python3 task.py
 ```
-8. Alternatively, for periodic updates of player and matches data, simply use crontab:
+2. Alternatively, use crontab job scheduling for periodic updates of player and matches data:
 ```
 0 0 0 * * python3 task.py
 ```
-For details of how cron job scheduling works check their documentations check [the Wikipedia page.](https://en.wikipedia.org/wiki/Cron)
+It is recommended that you use a cloud instance like AWS EC2 for crontab. For details of how cron job scheduling works check their documentations check [the Wikipedia page.](https://en.wikipedia.org/wiki/Cron)
