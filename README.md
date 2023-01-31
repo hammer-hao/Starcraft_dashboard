@@ -4,38 +4,38 @@ This is a group project that explores aspects of the Starcraft II ladder, mmr, a
 
 # How to use
 
-1. Clone the repository to your local machine
-2. Go to the Blizzard Battle.net API and register an account.
-3. Get your own client ID and secret. Save them into a ```.env``` file under /API requests/ in the following format:
+## Setting up virtual env
 
+1. Clone the repository to your local machine
+2. Set up the virtual env and install the dependencies:
+```
+$python3 -m venv env
+$source env/bin/activate
+(env)$pip install -r requirements.txt
+```
+
+## Setting up the configurations
+1. Go to the Blizzard Battle.net API and register an account.
+2. Get your own client ID and secret. Save them into a ```.env``` file under /API requests/ in the following format:
 ```
 CLIENTID=<your client id>
 SECRET=<your client secret>
 ```
-4. Set up your own mySQL server. This can be done on a local machine or using a web service provider like AWS. Once the database server is set up, input its credentials into a ```.env``` file under ```dataframes/``` in the following format:
-
+3. Set up your own mySQL server. This can be done on a local machine or using a web service provider like the RDS service on AWS. Once the database server is set up, input its credentials into a ```.env``` file in the following format:
 ```
-HOSTNAME=<path to the database>
+DBHOSTNAME=<path to the database>
 DBNAME=<your database name>
 DBUSERNAME=<your database username>
 PASSWORD=<your database password>
 ```
 
-5. Create a virtual environment in Python and activate it:
-
+## Running the code
+1. Once everything is set up, simply execute ```task.py``` under the /API requests/ folder:
 ```
-python3 -m venv env
-source env/bin/activate
+python3 task.py
 ```
-
-7. Install the required packages:
-
+2. Alternatively, use crontab job scheduling for periodic updates of player and matches data:
 ```
-pip install -r requirements.txt
+0 0 0 * * python3 task.py
 ```
-
-7. Run ```APIrequests.py``` under the /API requests/ folder.
-
-```
-python3 APIrequests.py
-```
+It is recommended that you use a cloud instance like AWS EC2 for crontab. For details of how cron job scheduling works check their documentations check [the Wikipedia page.](https://en.wikipedia.org/wiki/Cron)
