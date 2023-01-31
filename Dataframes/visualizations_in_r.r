@@ -10,7 +10,7 @@ library(reshape2)
 
 #set working directory and load files 
 setwd("~/DS105_Project")
-table_main2_file <- read.csv("player_full.txt")
+table_main2_file <- read.csv("processedplayers.txt")
 
 #creating different dataframes
 table_mmr_race_league <- table_main2_file[, c("mmr","race", "league")]
@@ -31,11 +31,15 @@ main_final_table <- transform(main_table, percent = ave(n, league, FUN = prop.ta
 
 #creating the Proportional Stacked Area Graph
 
-main_final_table$league <- factor(main_final_table$league , levels=c("Bronze 3", "Bronze 2", "Bronze 1", "Silver 3", "Silver 2", "Silver 1", "Gold 3", "Gold 2", "Gold 1", "Diamond 3", "Diamond 2", "Diamond 1", "Masters 3", "Masters 2", "Masters 1", "Grandmaster 1"))
+main_final_table2 <- main_final_table[!(main_final_table$race=="Unknown" |main_final_table$race=="unknown"),]
 
-final_graph_1 <- ggplot(main_final_table, (aes(x = league,  y = percent, fill = race, group = race))) +
-  geom_area(alpha=0.6 , linewidth=0.3, colour="black") + scale_fill_brewer(palette = "Set1")
+main_final_table2$league <- factor(main_final_table2$league , levels=c("Bronze 3", "Bronze 2", "Bronze 1", "Silver 3", "Silver 2", "Silve 1", "Gold 3", "Gold 2", "Gold 1", "Diamond 3", "Diamond 2", "Diamond 1", "Masters 3", "Masters 2", "Masters 1", "Grandmaster 1"))
+main_final_table2$race <- factor(main_final_table2$race , levels=c("RANDOM", "ZERG", "PROTOSS", "TERRAN"))
+
+final_graph_1 <- ggplot(main_final_table2, (aes(x = league,  y = percent, fill = race, group = race))) +
+  geom_area(alpha=0.6 , linewidth=0.3, colour="black") +   scale_fill_manual(values=c('grey', '#5519BD', '#FFFF40', '#244CB9'))
 
 #to view the graph
 final_graph_1
+
 
