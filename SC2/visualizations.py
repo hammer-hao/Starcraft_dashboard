@@ -9,8 +9,6 @@ import pandas as pd
 from plotnine import *
 #Below are for creating time heatmap
 from datetime import datetime
-from dateutil import tz
-import pytz
 
 #------------------Players Dataframe Visualizations---------------------------
 

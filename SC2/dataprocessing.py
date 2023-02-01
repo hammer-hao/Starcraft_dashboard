@@ -6,7 +6,6 @@ Created on Wed Nov 16 23:39:23 2022
 """
 import pandas as pd
 from tqdm import tqdm
-import numpy as np
 import requests
 from sqlalchemy import create_engine
 from SC2 import APIkey
@@ -24,17 +23,17 @@ def processmatches(dflist):
     #--------------Matches data processing and merging
     #import original matches data
     matches_part = dflist[1]
-    matches_part = matches_part.rename(columns={'0':"playerid",
-                                                '1':'name',
-                                                '2':'league',
-                                                '3':'mmr',
-                                                '4':'realm',
-                                                '5':'region',
-                                                '6':'map',
-                                                '7':'type',
-                                                '8':'result',
-                                                '9':'speed',
-                                                '10':'date'})
+    matches_part = matches_part.rename(columns={0:"playerid",
+                                                1:'name',
+                                                2:'league',
+                                                3:'mmr',
+                                                4:'realm',
+                                                5:'region',
+                                                6:'map',
+                                                7:'type',
+                                                8:'result',
+                                                9:'speed',
+                                                10:'date'})
     #import player data
     players_df = dflist[0].drop_duplicates(subset=['playerid'])
     #Merge datasets
@@ -60,7 +59,14 @@ def processmatches(dflist):
         "Inside and Out",
         "Moondance",
         "Waterfall",
-        "Tropical Sacrifice"]
+        "Tropical Sacrifice",
+        "Ancient Cistern",
+        "Dragon Scales",
+        "Altitude",
+        "Babylon",
+        "Royal Blood",
+        "Neohumanity",
+        "Gresvan"]
     #Keeping only the maps in the 1v1 ladder
     matches_forpairing=matches_full[matches_full['map'].isin(map_list)]
 
@@ -107,14 +113,7 @@ def processmatches(dflist):
 
     matches_paired=pairallmatches(matches_forpairing, map_list)
 
-    #saving the processed matches
-    matches_full.to_sql('processedmatches', engine, if_exists='replace', index=False)
-    matches_paired.to_sql('pairedmatches', engine, if_exists='replace', index=False)
-
     #--------------Players data processing--------------------------------------
-
-    #Loading and cleaning up data for players dataframe
-    players_df = pd.read_csv('player_full.csv', index_col=0)
 
     #Dropping duplicates
     players_df = players_df.drop_duplicates()
@@ -175,7 +174,7 @@ def processmatches(dflist):
                 'Gold 1','Platinum 3','Platinum 2','Platinum 1','Diamond 3','Diamond 2','Diamond 1',
                 'Masters 3','Masters 2', 'Masters 1']
         playersdf['grandmaster']=''
-        for i in range(3):
+        for i in range(2):
             this_boundaries=boundariesls[i]
             playersdf.loc[(playersdf['league']=='Grandmaster 1') & (playersdf['region']==(i+1)), 'grandmaster']=1
             for j in range(18):
@@ -195,4 +194,8 @@ def processmatches(dflist):
                     'Bronze 1': 'Bronze', 'Bronze 2': 'Bronze', 'Bronze 3': 'Bronze'}
         df['league_combined']=df.replace({'league': league_comb})['league']
 
+    #saving processed players data
     players_df.to_sql('processedplayers', engine, if_exists='replace', index=False)
+    #saving the processed matches
+    matches_full.to_sql('processedmatches', engine, if_exists='replace', index=False)
+    matches_paired.to_sql('pairedmatches', engine, if_exists='replace', index=False)
