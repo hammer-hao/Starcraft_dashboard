@@ -102,7 +102,7 @@ def processmatches(dflist):
         winners=matchesdf[matches_forpairing['result']=='Win']
         losers=matchesdf[matches_forpairing['result']=='Loss']
         paireddf=pd.DataFrame()
-        for thismap in maplist:
+        for thismap in tqdm(maplist):
             thismap_winners=winners.loc[matches_forpairing['map']==thismap]
             thismap_losers=losers.loc[matches_forpairing['map']==thismap]
             pairmatches(thismap_winners, thismap_losers)
