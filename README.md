@@ -38,4 +38,4 @@ python3 task.py
 ```
 0 0 0 * * python3 task.py
 ```
-It is recommended that you use a cloud instance like AWS EC2 for crontab. For details of how cron job scheduling works check their documentations check [the Wikipedia page.](https://en.wikipedia.org/wiki/Cron)
+>It is recommended that you use a cloud instance like AWS EC2 for crontab. For details of how cron job scheduling works check their documentations check [the Wikipedia page.](https://en.wikipedia.org/wiki/Cron)
