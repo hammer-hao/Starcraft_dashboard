@@ -59,7 +59,7 @@ This figure gives an overall picture of the MMR distribution of each race. Highe
 ### <br>**Race-wise win rates by league**
 <br>  
 
-![racewinratesbyleague](static/img/winratebyrace.png)
+![racewinratesbyleague](static/img/win_rate_by_race.png)
 
 This figure shows the win rate of each league by race. As the Figure illustrates, the win rate increases as the league goes up in general. The only exception is the sudden drop in the win rate of PROTOSS in Masters 3 and Masters 2 leagues. The win rates of three races overlap in the lower leagues, Bronze 1 and Silver 3, and middle-upper leagues Platinum 2 and Platinum 1. TERRAN tends to outperform the rest in the upper leagues from Diamond 2 to Grandmaster. This little heterogeneity makes us wonder: when playing against each other, is there one race that particularly outperforms the other? 
 
