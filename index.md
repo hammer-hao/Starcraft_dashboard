@@ -59,13 +59,14 @@ This figure gives an overall picture of the MMR distribution of each race. Highe
 ### <br>**Race-wise win rates by league**
 <br>  
 
-![racewinratesbyleague](static/img/race_winrates_by_league.png)
+![racewinratesbyleague](static/img/winratebyrace.png)
 
-This figure shows the win rate of each league by race. As the Figure illustrates, the performances of PROTOSS and TERRAN players are very similar across all leagues except for Bronze 3, in which PROTOSS tends to outperform TERRAN. Whereas the win rate of ZERG players is very different from its two counterparts. In particular, the significant drop in win rate occurs in much higher leagues, Platinum 3 and Platinum 2, than the cases of PROTOSS and TERRAN whose slumps both appear in Silver 3. This is consistent with the fact that ZERG has very different mechanics than the other two races.  Therefore, in lower-level leagues, ZERG tends to win more often, whereas, in middle and upper leagues, PROTOSS and TERRAN are more likely to outperform ZERG. This heterogeneity makes us wonder: when playing against each other, is there one race that particularly outperforms the other? 
+This figure shows the win rate of each league by race. As the Figure illustrates, the win rate increases as the league goes up in general. The only exception is the sudden drop in the win rate of PROTOSS in Masters 3 and Masters 2 leagues. The win rates of three races overlap in the lower leagues, Bronze 1 and Silver 3, and middle-upper leagues Platinum 2 and Platinum 1. TERRAN tends to outperform the rest in the upper leagues from Diamond 2 to Grandmaster. This little heterogeneity makes us wonder: when playing against each other, is there one race that particularly outperforms the other? 
+
 ### <br>**Matchup-wise win rates by league**
 
 ![matchupwinratesbyleague](static/img/matchup_winrates_by_league.png)
 
-As shown by the figure above, it turned out that in lower-level leagues, from Bronze 3 to Gold 2, ZERG significantly outperforms TERRAN, and the situation is similar for PROTOSS except for Bronze 3. However, when it comes to the upper leagues, ZERG players generally underperform when they play against the other races, except for the case where ZERG plays against PROTOSS in Masters 2 league. It is also worth noting that while the overall win rates of PROTOSS and TERRAN are similar in the upper leagues from Platinum to Grandmaster, when playing against each other, TERRAN tends to win more often than PROTOSS.
+As shown by the figure above, it turned out that in lower-level leagues, from Bronze 3 to Gold 2, ZERG significantly outperforms TERRAN, and the situation is similar for PROTOSS except for Bronze 3. However, when it comes to the upper leagues, ZERG players generally underperform when they play against the other races, except for the case where ZERG plays against PROTOSS in Masters 2 league. It is also worth noting that in the upper leagues from Diamond 2 to Grandmaster, when playing against each other, TERRAN tends to win more often than PROTOSS, which is consistent to what's shown by the previous figure. 
 
 theme: hacker
