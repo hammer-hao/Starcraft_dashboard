@@ -13,11 +13,16 @@ The data we want comes from a variety of API endpoints. Some important ones are 
 
 The figure above shows the basic structure of the Battle.net API endpoints for Starcraft II. To begin, we make a request to the `legacy/getLeagueData` endpoint which returns the `ladderid` of all active ladders in the current season. Then we make a request to the `ladder` endpoint using `ladderid` to obtain the list of `playerid` within the ladder. In the end, `playerid` is used to request the player's profile and their match history.
 
-We used a object-oriented approach to make API requests, defining `player` and `ladder` classes and corresponding methods in fetching data. 
-
 One issue that arises during data collection is the managing complexity of interactions between API endpoints. Due to the immense amount of raw data generated in the game, Blizzard had to store player level data in different endpoints. For instance, the `/profile/ladder` endpoint stores all performance data of players in a ladder (a mini-league uniquely identified by a `ladderid` that contains 100 players of the same level). However, to access the `/profile/ladder` endpoint, one must specify the `ladderid` as well as `playerid` in the API call, as the request is made at the player level.
 
-## Exploratory Analysis
+### Making things less messy: OOP approach
+
+We used a object-oriented approach to make API requests, defining `player` and `ladder` classes and corresponding `getmatchhistory` and `getplayers` methods in fetching data. This way, each `player` and `ladder` will have corresponding methods for different available API requests with unique URLs, and looping through those objects and calling the API request methods will yeild an list of dictionaries which can then then be converted to our dataframe. Here is a simple UML class diagram for class structure used:
+
+![umldiagram](static/img/UMLclassdiagram.png)
+
+
+## Exploratory analysis on fetched data
 
 Using API requests we are able to gather data on ~200,000 individual player profiles and ~5,000,000 matches. Note that since games are being played everyday and players are constantly joining/leaving the ladder, the number will vary slightly each time data is updated.
 
