@@ -7,7 +7,7 @@ Another question of interest is "Is the game well balanced in its mechanics? " I
 ### **<br>MMR (Matchmaking rating) distribution by in-game race:**
 <br>  
 
-![mmrdistributionbyrace](static/img/mmr_by_race.png)
+![mmrdistributionbyrace](static/img/MMR_distribution_by_race.png)
 
 This figure gives an overall picture of the MMR distribution of each race. Higher values of MMR tend to correspond to better performances. In Figure 1, the blue, yellow, and purple dotted lines show the mean values of MMR of TERRAN, PROTOSS, and ZERG respectively. This means that on average, ZERG players tend to have the best performance among the three races, and TERRAN is likely to be the one that underperforms. However, there are several problems with using MMR value as an indication of performance and skill. For instance, there exist some smurfs who specifically create or buy low-level accounts to play against lower-ranked players. In this case, their MMR would underestimate their performance and skill level. Moreover, MMR value could also be manipulated via hacking. As a result, it would be more appropriate to use win rate as an indicator of performance. 
 ### <br>**Race-wise win rates by league**
