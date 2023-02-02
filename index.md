@@ -20,7 +20,9 @@ One issue that arises during data collection is the managing complexity of inter
 ## Exploratory Analysis
 
 Using API requests we are able to gather data on ~200,000 individual player profiles and ~5,000,000 matches. Note that since games are being played everyday and players are constantly joining/leaving the ladder, the number will vary slightly each time data is updated.
+
 ### Player level data example (not real data)
+
 |Playerid|Name|Realm|Region|Rating|League|Wins|Losses|Race|
 |--------|----|-----|------|------|------|----|------|----|
 |1074576|SRHarstem|1|2|6700|Grandmaster|10|2|Protoss|
