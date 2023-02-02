@@ -4,15 +4,24 @@ Created on Wed Nov 16 16:45:59 2022
 
 @author: hammerhao
 """
-
 import pandas as pd
 from plotnine import *
-#Below are for creating time heatmap
-from datetime import datetime
-from dateutil import tz
-import pytz
+from tqdm import tqdm
+import requests
+from sqlalchemy import create_engine
+from SC2 import APIkey
+
+hostname=APIkey.dbhostname
+dbname=APIkey.dbname
+uname=APIkey.dbusername
+pwd=APIkey.password
+
+engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}"
+				.format(host=hostname, db=dbname, user=uname, pw=pwd))
 
 #------------------Players Dataframe Visualizations---------------------------
+
+players_df=pd.read_sql("SELECT * FROM processedplayers", engine)
 
 #-----------------------------------------------------------------------------
 #Graph 1: MMR distributions by server
@@ -85,9 +94,10 @@ figure2=(ggplot(df, aes(x='Race', y='Ratio', fill='category'))
 
 #----------------------------Matches Datafram Visualizations-------------------------
 
-matches_full=pd.read_csv('processedmatches.csv')
+matches_full=pd.read_sql("SELECT * FROM pairedmatches", engine)
 
 #Graph1: Time heatmap
+from datetime import datetime
 
 matches_full=matches_full[matches_full['type']=='1v1'][:]
 matches_full['time'] = pd.to_datetime(matches_full['date'], unit = 's')

@@ -13,7 +13,6 @@ import pandas as pd #for data frames
 from joblib import Parallel, delayed # for running parallel requests
 from tqdm import tqdm
 from SC2 import sc2, APIkey
-import os
 from dotenv import load_dotenv
 
 def getplayersandmatchdata():
@@ -29,11 +28,11 @@ def getplayersandmatchdata():
 
     #use the ladderidlist to update player stats and dave it to player_full_data
     player_full_data = pd.DataFrame(sc2.update_playerstats(ladderid_list), 
-                                    columns = ["playerid", "name", "realm", "region", "mmr", "league", "wins", "losses", "race"])
+                                    columns = ["playerid", "name", "realm", "region", "mmr", "wins", "losses", "race", "league"])
     
     player_full_list = player_full_data.values.tolist()
 
-    data_matches = Parallel(n_jobs=6, 
+    data_matches = Parallel(n_jobs=8, 
                             verbose=10)(delayed(sc2.getmatchhistory)
                                         (player) for player in tqdm(player_full_list, total=len(player_full_list)))
 
