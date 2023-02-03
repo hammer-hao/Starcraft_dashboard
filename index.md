@@ -1,10 +1,10 @@
-# Starcraft 2: Player and matches data analysis
+# Starcraft-Dashboard: Player and matches data analysis of starcraft II
 
 ![starcraft2cover](static/img/starcraftii_cover.png)
 
 ## Motivation
 
-### What is Starcraft 2?
+### What is Starcraft II?
 Starcraft II is a real-time military science fiction video game, developed by Blizzard Entertainment for PC and Mac. People win by destroying all of their opponents' buildings. 
 
 ![starcraft2gameplay](https://www.kotaku.com.au/wp-content/uploads/sites/3/2016/03/01/txgs2i1o2eyfarofz8he.gif)
@@ -19,7 +19,7 @@ What made us interested in this? We embarked on the project with some questions 
 
 Of course, these are simply some of the questions that spurred us to take up this project. We acknowledge that not all these questions can be answered by our data analysis, and the research path we took did not strictly follow these. However, this was what guided us initially.
 
-### How does Starcraft 2 work?
+### How does Starcraft II work?
 
 Players play in matches against one another. These matches take place in 3 servers - US, EU and Korea. Players can choose from different 3 different character Races - ZERG, PROTOSS and TERRAN (or they can choose a RANDOM race), each race with different characteristics hence strengths and weaknesses.
 
