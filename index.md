@@ -99,10 +99,11 @@ Using API requests we are able to gather data on ~200,000 individual player prof
 |1074576|EnceSerral|1|1|Zerg|Data-C|1v1|Win|faster|1671114514|
 |1074576|OnsydeMaru|1|3|Terran|Moondance|1v1|Loss|faster|1675106898|
 
-## Data Cleaning
+## Data Cleaning and transformation
 
 Before making visualizations, we had to make sure that the Data is nice and tidy. The battle.net API has a quite few bugs, this includes missing data from the server side, as well as flat-out wrong data. It is crucial that we filter out those corrupted data enries before performing analysis.
 
+### Basic cleaning: dropping duplicates and NAs
 The raw API contains bugged data points that would affect the outcome of the analysis. For example, duplicate player data may skew the results; abserd MMR scores are simply invalid and do not add value to the analysis; league labels do not necessarily match the MMR scores.
 
 Steps to clean the data include:
@@ -110,9 +111,10 @@ Steps to clean the data include:
 -Dropping players with unknown wins and losses
 -Dropping players with absert MMR scores
 -Converting wins and losses to integers
--Fixing league allocations based on league-MMR boundaries obtained from the API
 
-As a clarification, leagues are based on MMR, and each league as a corresponding MMR range that does not overlap with other leagues. 
+### Fixing league allocations based on league-MMR boundaries obtained from the API
+
+As a clarification, leagues are based on specific MMR boundaries, and each league as a corresponding MMR range that does not overlap with other leagues. However, a portion of player of all MMR ranges are misplaced into the bronze league when their matchmaking rating suggests that they should be long in a much higher league. We spotted this problem initially while doing visualizations. Player-level characteristics around the Bronze-Silver boundary are not continous, but kinked.
 
 To obtain the boundaries, we collected the 'min_rating' for each league tier on all servers. getboundaries() returns a list of 3 lists of boundaries for each league tier on each server. 
 
@@ -152,6 +154,10 @@ Note that, as the API is slightly bugged, not all league-MMR boundaries are accu
 
 
 Additionally, we added columns "Total Games" (given by wins+losses) and "Win Rate" (given by wins/totalgames) as they would prove useful in the analysis below.
+
+
+
+# Data Visualization
 
 ## Is the game well-balanced in its mechanics? 
 
