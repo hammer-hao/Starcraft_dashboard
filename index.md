@@ -182,7 +182,7 @@ As shown by the figure above, it turned out that in lower-level leagues, from Br
 ## What proportion of race A is in league B? 
 
 
-As previously established, in Starcraft 2 we have three main races - TERRAN, PROTOSS, and ZERG. In some circumstances, players are also able to choose a ‘RANDOM’ race at the beginning of a match. In terms of leagues, the game boasts 16 different leagues with ‘Bronze 3’ being the lowest and ‘Grandmaster 1’ being the highest.
+As previously established, in Starcraft 2 we have three main races - TERRAN, PROTOSS, and ZERG. In some circumstances, players are also able to choose a ‘RANDOM’ race at the beginning of a match. In terms of leagues, the game boasts 19 different leagues with ‘Bronze 3’ being the lowest and ‘Grandmaster’ being the highest.
 
 A main question we set out to investigate was whether the game is well balanced in its mechanics. Unlike before, this refers to the proportion of each race in each league. If we were to notice that a particular race tends to be placed in certain leagues more often than others, then it may be justified to question the balance of the game. 
 
@@ -198,19 +198,6 @@ Initially, we created a few data frames and decided to use the data frame with i
 Next, we created a new data frame called ‘main_final_table2’ where we simply removed all the unknown races from ‘main_final_table’ in order to devise a more accurate picture. After ordering the leagues from ‘Bronze 3’ to ‘Grandmaster 1’, and the races with ‘RANDOM’ on the highest stack and ‘TERRAN’ on the lowest, we created the Proportional Stacked Area Graph.
 
 ```{r}
-#import files
-
-library(rvest)
-library(tidyverse)
-library(dplyr)
-library(ggplot2)
-library(datasets)
-library(reshape2)
-
-
-#set working directory and load files 
-setwd("~/DS105_Project")
-table_main2_file <- read.csv("processedplayers.txt")
 
 #creating different dataframes
 table_mmr_race_league <- table_main2_file[, c("mmr","race", "league")]
@@ -250,7 +237,7 @@ final_graph_1
 
 This figure displays the proportion of each of the races in each of the leagues. From this, we can see that a bulk of the lower league players are TERRAN - they make up around 50% of the players in the Bronze leagues. Relatively, it is exceptionally harder to find PROTOSS or ZERG players in those lower leagues. This points to severe imbalance of the game when it comes to races in lower leagues. This finding may encourage new players to select races other than TERRAN if they want to maximise their chances of not competing in lower leagues. 
 
-However, it is crucial to note that the distribution of races in the higher leagues (from Diamond 3) are more equal. Referring to the previous analysis presented on win-rates by race in different leagues, it is interesting to observe how the TERRAN race actually outperforms the other races in higher leagues.
+However, it is crucial to note that the distribution of races in the higher leagues (from Platinum 3) are more equal. Referring to the previous analysis presented on win-rates by race in different leagues, it is interesting to observe how the TERRAN race actually outperforms the other races in higher leagues.
 
 
 
@@ -268,21 +255,6 @@ As we were concerned with only matches where players were against one other play
 We then added new columns into the main data frame, which had the weekdays and the time. Then in our new data frame called ‘main_table_heatmap’, we had a column for the weekday and a new column for just the hour. We ordered weekdays from Monday-Sunday and our time where 00 is 12-am and 23 is 11-pm. Lastly, we created the density heatmap using ggplot (geom_bin2d()). 
 
 ```{r}
-#import the packages
-
-library(rvest)
-library(tidyverse)
-library(dplyr)
-library(ggplot2)
-library(datasets)
-library(plotly)
-library(lubridate)
-
-#set working directory and load files 
-setwd("~/DS105_Project")
-matches_full <- read.csv("matchesdata.txt")
-
-#Grpah - time heat map
 
 matches_full_only_1v1 <- matches_full %>% filter(X7=="1v1")
 
