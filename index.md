@@ -1,6 +1,10 @@
+<center>
+
 # Starcraft-Dashboard: Player and matches data analysis of starcraft II
 
 ## 🟢Check out our web application [here](https://sc2dashboard.herokuapp.com)!🟢
+
+</center>
 
 <p style='text-align:center'>
 <img src="static/img/starcraftii_cover.png"  width=200px>
@@ -15,11 +19,10 @@ Starcraft II is a real-time military science fiction video game, developed by Bl
 
 ## Initial Goals
 What made us interested in this? We embarked on the project with some questions in mind:
--Why are some players ranked higher than others?
--How exactly does practicing more games affect players' skill levels?
--What is the association between a player's short and long term performance?
--Is the game well-balanced in its mechanics? E.g. Does one race win more often than other races?
--Why are Koreans so good? 
+* Why are some players ranked higher than others?
+* How exactly does practicing more games affect players' skill levels?
+* What is the association between a player's short and long term performance?
+* Is the game well-balanced in its mechanics? E.g. Does one race win more often than other races?
 
 Of course, these are simply some of the questions that spurred us to take up this project. We acknowledge that not all these questions can be answered by our data analysis, and the research path we took did not strictly follow these. However, this was what guided us initially.
 
@@ -89,8 +92,6 @@ Using API requests we are able to gather data on ~200,000 individual player prof
 |2754199|Alucard|1|1|3454|Diamond 3|102|110|Terran|
 |114514|Billy|1|2|2870|Platinum 2|45|40|Protoss|
 |1919810|Van|1|3|5436|Masters 1|34|25|Zerg|
-
-### Summary Statistics
 
 ### Match level data example (not real data)
 
@@ -191,6 +192,11 @@ Example of the `matches_full` dataframe (after the merge):
 Note that there exist duplicate columns after the merge that contain overlapped information, and afterwards we cleaned up the merged dataframe by dropping and renaming duplicated columns
 
 ### Finding an opponent for the matches: an temporary, to-be-improved solution to a sub-optimal scenario
+
+Unfortunately, the `getmatchhistory` only returns the match data from the point of view of the player that is associated with the `playerid` used to call the endpoint. This meant that each match played by player1 and player2 is licely recorded twice in the matches dataframe: once with player1's `playerid` and once with player2's  `playerid`. To fix this issue and find the missing opponent for all match entries, we used a [simple algorithm](#appendix) that for sure does not find the right opponent every time, but nevertheless seemed unbiased in its estimates:
+$$Match_i=argmin_{match_i}\Delta MMR^2+\Delta Data^2$$
+
+In English, for each match, we are find another match that is played roughly the same time, around the same rating, played on the same map, and the other match's owner has the opposite win/loss result.
 
 # Data Visualization
 
@@ -294,6 +300,137 @@ This density heatmap provides us with a visual path to understand the timings pe
 Given time is localised for each timezone, this plot shows us the frequency of games played in all the regions based on the hour and weekday. The ‘count’ bar, to the right of the plot, explains how the darker tiles show higher frequency of games played, whereas the lighter tiles show lower frequency of games played.
 
 This figure shows that people tend to play most on Sundays. Intuitively, this makes sense as it is a weekend and people tend to relax before the new week commences. However, noticing that people also play heavily on Wednesdays is striking - especially when you compare it to the days later in the week such as Fridays. Additionally, the heatmap shows us that people play more in the evenings. This was expected as people tend to relax in the evenings after attending to their daily commitments either at school or work.
+
+# Conclusion
+
+## Summary (TLDR):
+
+The data collection process attempts to collect all player data within a season, and was quite effective in doing so. The battle.net API had no hard restrictions on the number of requests and the request quota was set at a quite generous 36,000 per hour. This meant that even when we had more than 200,000 requests to make, letting the script run overnight or alternatively running the script on a cloud instance should still be relatively convenient.
+
+One major obstacle was the API side bugs. Battle.net API is not as well maintained as more popular APIs such as that of Twitter or Spotify. Some bugs such as duplicate players were quickly found and sorted. We also became aware of more bugs as we started analysing the data, such as mismatched league data which had to be fixed. 
+
+## Limitations
+
+Limitations do exist in the data fetching/processing steps. Namely, the match pairing algorithm is still being actively maintained, as we are exploring pandas.parellelapply() as well as pandas inner join to vectorize the match pairing process. Currently pairing all matches using a for loop takes about 10 minutes on an 8-core gpu. We believe this can be reduced to seconds if we are able to vectorize the operation with numPy/Pandas, which are based in C++.
+
+Maintaining availability of the database can become difficult because the code is prone to internet instability. While it has not occurred yet, an connection error to the database can cause the code to terminate in the cloud instance when it is running its routine cron job. Writing exceptions for connection errors will solve this problem. With weekly updates of the player and match data, the 20GB of storage in the AWS RDS free tier is also quickly diminishing. We will have to change the code to override tables in the future to make sure we stay under the free tier limit.
+
+## Key Findings and Implications:
+
+Regarding the game balance in terms of having equal strength, the degree of balance varies across leagues. If we look at the overall win rate of each race across different levels of leagues, the game is most balanced from the middle-lower leagues to the middle-upper league (from Bronze 1 to Diamond 2) where the trend lines of win rate of each race overlap each other very frequently. 
+
+Whereas in the two lowest leagues (Bronze 3 and Bronze 2), PROTOSS players tend to win more often than players of the other two races. This is consistent with the results we find based on the figure showing the matchup-wise win rate by league: in the lowest leagues, when ZERG and TERRAN players match up with PROTOSS players, their win rates are below 0.5, which confirms the fact that PROTOSS players are indeed more advantaged over its counterparts. This could be informative to low-level beginners who want an enjoyable gaming experience when they choose which race to play. 
+
+On the other hand, for players who would like to ace in the upper leagues (from Masters 3 to Grandmaster), they’d better choose TERRAN, as its overall win rate and the win rates when playing against the other two races are the highest in this range.
+
+Moreover, when assessing whether the game is well-balanced in terms of the distribution of races in each league, it was striking to observe the extreme disproportion in the lower leagues. 
+One implication of this is that users who strive to play in higher leagues may utilise this information to help them decide not to use TERRAN as they would more likely be placed in the Bronze leagues. Alternatively, to further create a pleasant gaming experience for beginners, this information may help them to decide to choose TERRAN and be placed in easier leagues. 
+
+When we consider the findings from the heatmap, a few key implications springs to mind. Firstly, observing how the frequency of games played each day is the highest during evenings can give us hints about the demographic. The evidence from our sample implies that a large proportion of Starcraft2 players are either working adults or students. This inference simply stems from the fact that as most of the games played occur in the evening, it is highly likely these people have commitments (such as school/work), hence cannot play during the day. Secondly, the heatmap can provide useful information to all players, regardless of skill levels, as it illustrates how most people play in the evening. This means players can purposefully choose to play later on in the day to have higher chances of getting matched up with other players quickly. Lastly, Blizzard Entertainment could also employ this information to help inform their spending on server maintenance. As they notice most players play in the evenings, they could decide to shift or increase more spending on server maintenance during those hours. Ultimately allowing them to improve their customer service and reputation. 
+ 
+Overall, we must acknowledge that not all our initial questions could be answered, especially those that were overly ambitious given the limitations of our data set. However, we did find some interesting trends that players can use to gain an advantage in gameplay.
+
+
+# Appendix
+
+## <a name='matchpairing'>Match pairing: python code</a>
+
+```
+def processmatches(dflist):
+    
+    #--------------Matches data processing and merging
+    #import original matches data
+    matches_part = dflist[1]
+    matches_part = matches_part.rename(columns={0:"playerid",
+                                                1:'name',
+                                                2:'league',
+                                                3:'mmr',
+                                                4:'realm',
+                                                5:'region',
+                                                6:'map',
+                                                7:'type',
+                                                8:'result',
+                                                9:'speed',
+                                                10:'date'})
+    #import player data
+    players_df = dflist[0].drop_duplicates(subset=['playerid'])
+    #Merge datasets
+    matches_full = pd.merge(matches_part, players_df, left_on='playerid', right_on='playerid', validate='m:1')
+    #drop duplicate columns
+    matches_full = matches_full.drop(columns=["name_y", "realm_y", "region_y", "mmr_y", "league_y"])
+    #rename the columns
+    matches_full = matches_full.rename(columns={'name_x':'name',
+                                                'league_x':'league',
+                                                'mmr_x':'mmr',
+                                                'realm_x':'realm',
+                                                'region_x':'region'})
+    #dropping duplicates of the same match
+    matches_full=matches_full.drop_duplicates(subset=['playerid', 'map', 'result', 'date'])
+
+    #--------------pairing matches----------------------------------------------
+
+    #Filtering out non-1v1 matches
+    map_list=[
+        'Cosmic Sapphire',
+        "Data-C",
+        "Stargazers",
+        "Inside and Out",
+        "Moondance",
+        "Waterfall",
+        "Tropical Sacrifice",
+        "Ancient Cistern",
+        "Dragon Scales",
+        "Altitude",
+        "Babylon",
+        "Royal Blood",
+        "Neohumanity",
+        "Gresvan"]
+    #Keeping only the maps in the 1v1 ladder
+    matches_forpairing=matches_full[matches_full['map'].isin(map_list)]
+
+    def pairmatches(winner_df, loser_df):
+        #Creating columns for opponents
+        winner_df['opponentid']=""
+        winner_df['opponentname']=""
+        winner_df['opponentrace']=""
+        #reseting index for the for loop
+        winner_df.reset_index(drop=True, inplace=True)
+        #interate over rows in the winners dataframe
+        for i, row in tqdm(winner_df.iterrows(), total=int(winner_df.shape[0]), desc='pairing matches'):
+            #Find all matches within the three minutes range
+            losers=loser_df[loser_df['date'].between(row[10]-180,row[10]+180)]
+            #eliminate matches that are in another server
+            losers=losers[losers['region']==row['region']]
+            #creating penalty score
+            losers['penalty']=(losers['mmr']-row['mmr'])**2+(losers['date']-row['date'])**2
+            #selecting the match with the least penalty score
+            loser=losers[losers['penalty']==losers.penalty.min()]
+            #assign the opponent if we found one
+            try:
+                winner_df.iat[i, 14]=loser.iloc[0]['playerid']
+                winner_df.iat[i, 15]=loser.iloc[0]['name']
+                winner_df.iat[i, 16]=loser.iloc[0]['race']
+            #return unknown if cant find opponent
+            except IndexError:
+                winner_df.iat[i, 14]='unknown'
+                winner_df.iat[i, 15]='unknown'
+                winner_df.iat[i, 16]='unknown'
+
+    def pairallmatches(matchesdf, maplist):
+        winners=matchesdf[matches_forpairing['result']=='Win']
+        losers=matchesdf[matches_forpairing['result']=='Loss']
+        paireddf=pd.DataFrame()
+        for thismap in tqdm(maplist):
+            thismap_winners=winners.loc[matches_forpairing['map']==thismap]
+            thismap_losers=losers.loc[matches_forpairing['map']==thismap]
+            pairmatches(thismap_winners, thismap_losers)
+            pairmatches(thismap_losers, thismap_winners)
+            thismap=pd.concat([thismap_winners, thismap_losers])
+            paireddf=pd.concat([paireddf, thismap])
+        return paireddf
+
+    matches_paired=pairallmatches(matches_forpairing, map_list)
+```
 
 ## Group member roles
 
