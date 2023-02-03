@@ -31,7 +31,7 @@ main_table <- table_race_league %>% group_by(race, league) %>%
 
 main_final_table <- transform(main_table, percent = ave(n, league, FUN = prop.table))
 
-#creating the Proportional Stacked Area Graph
+#creating the Proportional Stacked Area Graph.
 
 main_final_table2 <- main_final_table[!(main_final_table$race=="Unknown" |main_final_table$race=="unknown"),]
 
