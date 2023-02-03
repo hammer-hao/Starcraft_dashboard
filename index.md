@@ -234,7 +234,7 @@ final_graph_1 <- ggplot(main_final_table2, (aes(x = league,  y = percent, fill =
 #to view the graph
 final_graph_1
 ```
-
+</details>
 
 ### <br>**Proportional Stacked Area Graph - showing what races are the leagues composed of:**
 
@@ -259,6 +259,8 @@ As we were concerned with only matches where players were against one other play
 
 We then added new columns into the main data frame, which had the weekdays and the time. Then in our new data frame called ‘main_table_heatmap’, we had a column for the weekday and a new column for just the hour. We ordered weekdays from Monday-Sunday and our time where 00 is 12-am and 23 is 11-pm. Lastly, we created the density heatmap using ggplot (geom_bin2d()). 
 
+<details>
+<summary>
 ```{r}
 
 matches_full_only_1v1 <- matches_full %>% filter(X7=="1v1")
@@ -315,6 +317,9 @@ final_graph_heatmap_main <- ggplot(data= main_table_heatmap, aes(main_dataframe_
 
 final_graph_heatmap_main 
 ```
+</summary>
+View R code for time heatmap
+</details>
 
 ### <br>**Heatmap displaying the frequency of games played - based on hour and weekday:**
 
