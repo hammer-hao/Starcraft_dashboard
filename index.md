@@ -1,5 +1,7 @@
 # Starcraft-Dashboard: Player and matches data analysis of starcraft II
 
+## 🟢Check out our web application [here](https://sc2dashboard.herokuapp.com)!🟢
+
 <p style='text-align:center'>
 <img src="static/img/starcraftii_cover.png"  width=200px>
 </p>
@@ -116,46 +118,79 @@ Steps to clean the data include:
 
 As a clarification, leagues are based on specific MMR boundaries, and each league as a corresponding MMR range that does not overlap with other leagues. However, a portion of player of all MMR ranges are misplaced into the bronze league when their matchmaking rating suggests that they should be long in a much higher league. We spotted this problem initially while doing visualizations. Player-level characteristics around the Bronze-Silver boundary are not continous, but kinked.
 
-To obtain the boundaries, we collected the 'min_rating' for each league tier on all servers. getboundaries() returns a list of 3 lists of boundaries for each league tier on each server. 
+To obtain the boundaries, we collected the 'min_rating' for each league tier on all servers. getboundaries() returns a list of 3 lists of boundaries for each league tier on each server. For bronze leagues, we had to rely on arbitrary boundaries based on the [MMR-Ranges github repo](https://burnysc2.github.io/MMR-Ranges/) maintained by burnysc2. Also, grandmasters league is not bugged and does not need to be fixed. Any grandmaster player shall remain as grandmaster in the players dataframe.
 
 ```Python
-    #getting boundaries from the Battle.net API. The function returns 18 mmr values for the mmr floor for each range. 
-    def getboundaries(season, region):
-        #Creating emtpy list to store all boundaries in this server
-        boundarieslist=[]
-        #Looping from Bronze(0) to Masters(5)
-        for i in range(6):
-            #Generating URL
-            url = ('https://'+ 
-                str(APIkey.region_idr[region]) +
-                '.api.blizzard.com/data/sc2/league/' +
-                str(season) +
-                '/201/0/'+str(i))
-            #Creating requests session
-            league_response=requests.get(url, params=APIkey.token)
-            #Checking if response is 200 OK
-            if league_response.status_code==200:
-                #Pring url to show that request was successful
-                print(url)
-                tier=league_response.json()['tier']
-                #Extracting mmr floor of each tier
-                thisleague_tiers=[tier[2]['min_rating'], tier[1]['min_rating'], tier[0]['min_rating']]
-                boundarieslist=boundarieslist+thisleague_tiers
-            else:
-                print('error retrieving boundaries for leauge ' + str(i))
-                print(league_response)
-        if (region==1 or region==2):
-            boundarieslist[0]=1045
-            boundarieslist[1]=1283
-            boundarieslist[2]=1522
-        return boundarieslist
+#getting boundaries from the Battle.net API. The function returns 18 mmr values for the mmr floor for each range. 
+def getboundaries(season, region):
+    #Creating emtpy list to store all boundaries in this server
+    boundarieslist=[]
+    #Looping from Bronze(0) to Masters(5)
+    for i in range(6):
+        #Generating URL
+        url = ('https://'+ 
+            str(APIkey.region_idr[region]) +
+            '.api.blizzard.com/data/sc2/league/' +
+            str(season) +
+            '/201/0/'+str(i))
+        #Creating requests session
+        league_response=requests.get(url, params=APIkey.token)
+        #Checking if response is 200 OK
+        if league_response.status_code==200:
+            #Print url to show that request was successful
+            print(url)
+            tier=league_response.json()['tier']
+            #Extracting mmr floor of each tier
+            thisleague_tiers=[tier[2]['min_rating'], tier[1]['min_rating'], tier[0]['min_rating']]
+            boundarieslist=boundarieslist+thisleague_tiers
+        else:
+            print('error retrieving boundaries for leauge ' + str(i))
+            print(league_response)
+    if (region==1 or region==2):
+        #using mmr-ranges website mmrs for us and eu
+        boundarieslist[0]=1045
+        boundarieslist[1]=1283
+        boundarieslist[2]=1522
+    return boundarieslist
 ```
-Note that, as the API is slightly bugged, not all league-MMR boundaries are accurate, and we had to rely on arbitrary boundaries based on https://burnysc2.github.io/MMR-Ranges/. Also, grandmasters league is not bugged and does not need to be fixed. Any grandmaster player shall remain as grandmaster in the players dataframe.
-
 
 Additionally, we added columns "Total Games" (given by wins+losses) and "Win Rate" (given by wins/totalgames) as they would prove useful in the analysis below.
 
+### Merging player and match level data using pd.merge()
 
+It would be useful in our analysis to know a player’s race, win/losses, and MMR (matchmaking rating) in a match level visualization. Back when we discussed the API usage, we mentioned that match data are called using the playerid, which means that there is an exclusive one-to-many relationship between the player and their past matches in the two dataframes, with `playerid` as the id to identify those relationships. With this in mind, we used pd.merge() in pandas module to merge players data into match data with a m:1 merge, using playerid as the key:
+
+```Python
+players_df = dflist[0].drop_duplicates(subset=['playerid'])
+matches_full = pd.merge(matches_part, players_df, left_on='playerid', right_on='playerid', validate='m:1')
+```
+Example of the `matches_part` dataframe (before the merge):
+
+|Playerid|Name|Realm|Region|Race|Map|Type|Result|Speed|Date|
+|--------|----|-----|------|----|--|------|----|------|----|
+|1074576|SRHarstem|1|2|Protoss|Babylon|1v1|Win|faster|1675124962|
+|1074576|SRHarstem|1|2|Protoss|Altitude|1v1|Win|faster|1675124962|
+|1074576|SRHarstem|1|2|Protoss|Ancient Cistern|1v1|Win|faster|1675124962|
+|1074576|SRHarstem|1|2|Protoss|Ephemoron|1v1|Win|faster|1675124962|
+
+Example of the `players_df` entry used to merge with the `matches_part` dataframe:
+
+|Playerid|Name|Realm|Region|Rating|League|Wins|Losses|Race|
+|--------|----|-----|------|------|------|----|------|----|
+|1074576|SRHarstem|1|2|6700|Grandmaster|10|2|Protoss|
+
+Example of the `matches_full` dataframe (after the merge):
+
+|Playerid|Name|Realm|Region|Race|Map|Type|Result|Speed|Date|Wins|Losses|League|
+|--------|----|-----|------|----|--|------|----|------|----|-|-|-|
+|1074576|SRHarstem|1|2|Protoss|Babylon|1v1|Win|faster|1675124962|10|2|Grandmaster|
+|1074576|SRHarstem|1|2|Protoss|Altitude|1v1|Win|faster|1675124962|10|2|Grandmaster|
+|1074576|SRHarstem|1|2|Protoss|Ancient Cistern|1v1|Win|faster|1675124962|10|2|Grandmaster|
+|1074576|SRHarstem|1|2|Protoss|Ephemoron|1v1|Win|faster|1675124962|10|2|Grandmaster|
+
+Note that there exist duplicate columns after the merge that contain overlapped information, and afterwards we cleaned up the merged dataframe by dropping and renaming duplicated columns
+
+### Finding an opponent for the matches: an temporary, to-be-improved solution to a sub-optimal scenario
 
 # Data Visualization
 
