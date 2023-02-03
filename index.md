@@ -1,6 +1,6 @@
 # Starcraft 2: Player and matches data analysis
 
-![starcraft2cover](static/img/starcraftii_cover.jpg)
+![starcraft2cover](static/img/starcraftii_cover.png)
 
 ## Motivation
 
@@ -193,38 +193,19 @@ A main question we set out to investigate was whether the game is well balanced 
 
 The findings of this research could be used as an indicator for players;  in this sense, it may assist them when it comes to choosing which race to play.
 
+### <br>**Graphing league-wise race compositions proportionally:**
 
-### <br>**Utilising tidyverse on RStudio:**
-
-The code below demonstrates how we used packages such as tidyverse to create this Proportional Stacked Area Graph.
+The code below demonstrates how we used tidyverse and ggPlot2 in R to create this Proportional Stacked Area Graph.
 
 Initially, we created a few data frames and decided to use the data frame with information on race and league for this exploration. To get the format required, we converted the data in both columns into factors and obtained the percentages for each race in each league. We put this into a new data frame called ‘main_final_table’.
 
 Next, we created a new data frame called ‘main_final_table2’ where we simply removed all the unknown races from ‘main_final_table’ in order to devise a more accurate picture. After ordering the leagues from ‘Bronze 3’ to ‘Grandmaster 1’, and the races with ‘RANDOM’ on the highest stack and ‘TERRAN’ on the lowest, we created the Proportional Stacked Area Graph.
 
+### **League-wise race proportions**
+
+![raceineachleague](static/img/Proportional_Stacked_Area_Graph.png)
+
 ```{r}
-
-#creating different dataframes
-table_mmr_race_league <- table_main2_file[, c("mmr","race", "league")]
-table_mmr_race_region <- table_main2_file[, c("mmr","race", "region")]
-table_race_league <- table_main2_file[, c("race", "league")]
-
-
-#editing the format of the variables and creating a dataframe with the percentages
-
-table_race_league$league <- as.factor(table_race_league$league)
-table_race_league$race <- as.factor(table_race_league$race)
-view(table_race_league)
-
-main_table <- table_race_league %>% group_by(race, league) %>%
-  tally()
-
-main_final_table <- transform(main_table, percent = ave(n, league, FUN = prop.table))
-
-#creating the Proportional Stacked Area Graph.
-
-main_final_table2 <- main_final_table[!(main_final_table$race=="Unknown" |main_final_table$race=="unknown"),]
-
 main_final_table2$league <- factor(main_final_table2$league , levels=c("Bronze 3", "Bronze 2", "Bronze 1", "Silver 3", "Silver 2", "Silver 1", "Gold 3", "Gold 2", "Gold 1", "Diamond 3", "Diamond 2", "Diamond 1", "Masters 3", "Masters 2", "Masters 1", "Grandmaster 1"))
 main_final_table2$race <- factor(main_final_table2$race , levels=c("RANDOM", "ZERG", "PROTOSS", "TERRAN"))
 
@@ -234,11 +215,6 @@ final_graph_1 <- ggplot(main_final_table2, (aes(x = league,  y = percent, fill =
 #to view the graph
 final_graph_1
 ```
-</details>
-
-### <br>**Proportional Stacked Area Graph - showing what races are the leagues composed of:**
-
-![raceineachleague](static/img/Proportional Stacked Area Graph.png)
 
 This figure displays the proportion of each of the races in each of the leagues. From this, we can see that a bulk of the lower league players are TERRAN - they make up around 50% of the players in the Bronze leagues. Relatively, it is exceptionally harder to find PROTOSS or ZERG players in those lower leagues. This points to severe imbalance of the game when it comes to races in lower leagues. This finding may encourage new players to select races other than TERRAN if they want to maximise their chances of not competing in lower leagues. 
 
@@ -259,6 +235,10 @@ As we were concerned with only matches where players were against one other play
 
 We then added new columns into the main data frame, which had the weekdays and the time. Then in our new data frame called ‘main_table_heatmap’, we had a column for the weekday and a new column for just the hour. We ordered weekdays from Monday-Sunday and our time where 00 is 12-am and 23 is 11-pm. Lastly, we created the density heatmap using ggplot (geom_bin2d()). 
 
+### <br>**Heatmap displaying the frequency of games played - based on hour and weekday:**
+
+![heatmapdiagram](static/img/Heatmap of times people play.png)
+
 ```{r}
 main_table_heatmap$ordered_time <- factor(main_table_heatmap$ordered_time, levels=c('24', '23', '22', '21', '20', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02', '01', '00'))
 
@@ -272,21 +252,11 @@ final_graph_heatmap_main <- ggplot(data= main_table_heatmap, aes(main_dataframe_
   scale_fill_gradient(low = "deepskyblue", high = "midnightblue") 
 ```
 
-### <br>**Heatmap displaying the frequency of games played - based on hour and weekday:**
-
-![heatmapdiagram](static/img/Heatmap of times people play.png)
-
-
 This density heatmap provides us with a visual path to understand the timings people play. It also allows us to spot trends easily as it gives us an instant overview of the data.
 
 Given time is localised for each timezone, this plot shows us the frequency of games played in all the regions based on the hour and weekday. The ‘count’ bar, to the right of the plot, explains how the darker tiles show higher frequency of games played, whereas the lighter tiles show lower frequency of games played.
 
 This figure shows that people tend to play most on Sundays. Intuitively, this makes sense as it is a weekend and people tend to relax before the new week commences. However, noticing that people also play heavily on Wednesdays is striking - especially when you compare it to the days later in the week such as Fridays. Additionally, the heatmap shows us that people play more in the evenings. This was expected as people tend to relax in the evenings after attending to their daily commitments either at school or work.
-
-
-
-
-
 
 ## Group member roles
 
