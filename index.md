@@ -339,8 +339,6 @@ This figure shows that people tend to play most on Sundays. Intuitively, this ma
 
 ## Group member roles
 
-<center>
-
 ||Nigel|Zihe|Qing|Awo|
 |----|-----|----|----|---|
 |Data Collection|-|√|-|-|
@@ -348,5 +346,3 @@ This figure shows that people tend to play most on Sundays. Intuitively, this ma
 |Data Visualization|√|-|√|√|
 |Database maintanance|-|√|-|-|
 |Documentation|√|-|√|√|
-
-</center>
