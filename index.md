@@ -49,6 +49,58 @@ players_df=pd.read_sql('SELECT * FROM players', engine)
 players_df.to_sql('processedplayers', engine, if_exists='replace', index=False)
 ```
 
+### Data Cleaning
+
+The raw API contains bugged data points that would affect the outcome of the analysis. For example, duplicate player data may skew the results; abserd MMR scores are simply invalid and do not add value to the analysis; league labels do not necessarily match the MMR scores.
+
+Steps to clean the data include:
+-Dropping duplicate players (using .drop_duplicates())
+-Dropping players with unknown wins and losses
+-Dropping players with absert MMR scores
+-Converting wins and losses to integers
+-Fixing league allocations based on league-MMR boundaries obtained from the API
+
+As a clarification, leagues are based on MMR, and each league as a corresponding MMR range that does not overlap with other leagues. 
+
+To obtain the boundaries, we collected the 'min_rating' for each league tier on all servers. getboundaries() returns a list of 3 lists of boundaries for each league tier on each server. 
+
+```Python
+    #getting boundaries from the Battle.net API. The function returns 18 mmr values for the mmr floor for each range. 
+    def getboundaries(season, region):
+        #Creating emtpy list to store all boundaries in this server
+        boundarieslist=[]
+        #Looping from Bronze(0) to Masters(5)
+        for i in range(6):
+            #Generating URL
+            url = ('https://'+ 
+                str(APIkey.region_idr[region]) +
+                '.api.blizzard.com/data/sc2/league/' +
+                str(season) +
+                '/201/0/'+str(i))
+            #Creating requests session
+            league_response=requests.get(url, params=APIkey.token)
+            #Checking if response is 200 OK
+            if league_response.status_code==200:
+                #Pring url to show that request was successful
+                print(url)
+                tier=league_response.json()['tier']
+                #Extracting mmr floor of each tier
+                thisleague_tiers=[tier[2]['min_rating'], tier[1]['min_rating'], tier[0]['min_rating']]
+                boundarieslist=boundarieslist+thisleague_tiers
+            else:
+                print('error retrieving boundaries for leauge ' + str(i))
+                print(league_response)
+        if (region==1 or region==2):
+            boundarieslist[0]=1045
+            boundarieslist[1]=1283
+            boundarieslist[2]=1522
+        return boundarieslist
+```
+Note that, as the API is slightly bugged, not all league-MMR boundaries are accurate, and we had to rely on arbitrary boundaries based on https://burnysc2.github.io/MMR-Ranges/. Also, grandmasters league is not bugged and does not need to be fixed. Any grandmaster player shall remain as grandmaster in the players dataframe.
+
+
+Additionally, we added columns "Total Games" (given by wins+losses) and "Win Rate" (given by wins/totalgames) as they would prove useful in the analysis below.
+
 ## Exploratory analysis on fetched data
 
 Using API requests we are able to gather data on ~200,000 individual player profiles and ~5,000,000 matches. Note that since games are being played everyday and players are constantly joining/leaving the ladder, the number will vary slightly each time data is updated.
