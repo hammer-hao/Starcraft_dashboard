@@ -1,4 +1,4 @@
-# DS_project
+# Starcraft-dashboard
 
 This is a group project that explores aspects of the Starcraft II ladder, mmr, and win ratio using Python scripts.
 
@@ -32,10 +32,10 @@ PASSWORD=<your database password>
 ## Running the code
 1. Once everything is set up, simply execute ```task.py``` under the /API requests/ folder:
 ```
-python3 task.py
+(env)$python3 task.py
 ```
 2. Alternatively, use crontab job scheduling for periodic updates of player and matches data:
 ```
-0 0 0 * * python3 task.py
+$0 0 0 * * source/env/bin/activate && python3 task.py && deactivate
 ```
 >It is recommended that you use a cloud instance like AWS EC2 for crontab. For details of how cron job scheduling works check their documentations check [the Wikipedia page.](https://en.wikipedia.org/wiki/Cron)
