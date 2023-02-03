@@ -21,13 +21,10 @@ engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}"
 
 def generateplots():
     #------------------Players Dataframe Visualizations---------------------------
-
     players_df=pd.read_sql("SELECT * FROM processedplayers", engine)
 
     #-----------------------------------------------------------------------------
-    #Graph 1: MMR distributions by server
-        
-    #remapping region
+    #MMR distributions by server
     region_dict = {
         1:'us',
         2:'eu',
@@ -38,60 +35,65 @@ def generateplots():
     eu_df = players_df[players_df['region']=='eu'][:]
     kr_df = players_df[players_df['region']=='kr'][:]
     us_df = players_df[players_df['region']=='us'][:]
-    figure1 = (ggplot(players_df, aes(x='mmr', fill='region')) + 
+    server_dist = (ggplot(players_df, aes(x='mmr', fill='region')) + 
     geom_density(alpha=.3) + geom_vline(us_df, aes(xintercept='mmr.mean()'), color='blue', linetype="dashed", size=1) + 
     geom_vline(kr_df, aes(xintercept='mmr.mean()'), color='green', linetype="dashed", size=1) +
     geom_vline(eu_df, aes(xintercept='mmr.mean()'), color='red', linetype="dashed", size=1) +
     theme_bw()
     )
-
-    #Graph 2: MMR distributions by race
-
-    #dropping players with unknown wins and losses
-    race_df= players_df[players_df['wins']!='unknown'][:]
-    #Dropping players with unknown and random race
-    race_df = race_df[players_df['race']!='Unknown'][:]
-    race_df = race_df[players_df['race']!='RANDOM'][:]
-    #Make the plot
-    PROTOSS_df = race_df[players_df['race']=='PROTOSS'][:]
-    TERRAN_df = race_df[players_df['race']=='TERRAN'][:]
-    ZERG_df = race_df[players_df['race']=='ZERG'][:]
-    figure2 = (ggplot(race_df, aes(x='mmr', fill='race')) +
-    geom_density(alpha=.3) + geom_vline(ZERG_df, aes(xintercept='mmr.mean()'), color='blue', linetype="dashed", size=1) +
-    geom_vline(TERRAN_df, aes(xintercept='mmr.mean()'), color='green', linetype="dashed", size=1) +
-    geom_vline(PROTOSS_df, aes(xintercept='mmr.mean()'), color='red', linetype="dashed", size=1) +
-    theme_bw()
+    PROTOSS_df = players_df[players_df['race']=='PROTOSS'][:]
+    TERRAN_df = players_df[players_df['race']=='TERRAN'][:]
+    ZERG_df = players_df[players_df['race']=='ZERG'][:]
+    race_dist = (ggplot(players_df, aes(x='mmr', fill='race')) +
+                geom_density(alpha=.3) +
+                scale_fill_manual(values=('#FFFF40','#244CB9','#5519BD')) +
+                geom_vline(ZERG_df, aes(xintercept='mmr.mean()'), color='#5519BD', linetype="dashed", size=1) +
+                geom_vline(TERRAN_df, aes(xintercept='mmr.mean()'), color='#244CB9', linetype="dashed", size=1) +
+                geom_vline(PROTOSS_df, aes(xintercept='mmr.mean()'), color='#FFFF40', linetype="dashed", size=1) +
+                theme_bw()
     )
 
-    #Graph 3: Distribution of total number of games played
-    figure3 = (ggplot(players_df, aes(x='totalgames')) +
-            geom_histogram(binwidth=10, color="blue", fill="lightblue") +
-            geom_density(alpha=.2, fill="#FF6666") +
-            theme_bw()
-            )
+    #race-wise win rates
+    TOT = {}
+    for index, row in players_df.iterrows():
+        key = row['league'] + '::' + row['race']
+        if(key in TOT ) :
+            TOT[key][0] =TOT[key][0] + players_df['winrate'][index]
+            TOT[key][1] =TOT[key][1] + 1
+        else :
+            TOT[key] = [players_df['winrate'][index], 1]
+    outputFile = open("winratebyrace.csv", 'w')
+    outputFile.write('league,race,win_rate\n')
+    for key in sorted(TOT) :
+        [key1, key2] = key.split('::')
+        outputFile.write(f'{key1},{key2},{TOT[key][0] / TOT[key][1]}\n')
+    outputFile.close()
+    df = pd.read_csv('winratebyrace.csv').dropna()
+    df['league'] = pd.Categorical(df['league'], categories=['Bronze 3','Bronze 2','Bronze 1','Silver 3',
+                                                            'Silver 2','Silver 1','Gold 3','Gold 2','Gold 1',
+                                                            'Platinum 3','Platinum 2', 'Platinum 1',
+                                                            'Diamond 3','Diamond 2', 'Diamond 1', 'Masters 3',
+                                                            'Masters 2','Masters 1','Grandmaster'], ordered=True)
+    racewinrates = ggplot(df, aes(x="league", y="win_rate",
+                        group="race")) +\
+        geom_line(mapping=aes(linetype='race', color='race')) +\
+        labs(title='League vs Win Rate by Race') +\
+        theme(axis_text_x=element_text(rotation=30, hjust=1))
 
-    #Graph 4: Qing's bar graph
-    df = pd.DataFrame({
-        'Race':['PROTOSS','PROTOSS','TERRAN','TERRAN','ZERG','ZERG'],
-        'category':['mean PROTOSS','median PROTOSS','mean TERRAN','median TERRAN','mean ZERG','median ZERG'],
-        'Ratio':[1.13,1,1.09,1,1.16,1.03]
-    })
-    df['Race']=pd.Categorical(df['Race'],categories=['PROTOSS','TERRAN','ZERG'])
-    df['category']=pd.Categorical(df['category'],categories=df['category'])
-    print(df)
+    #matchup-wise win rates
+    matchup_df=pd.read_csv('static/csv/winratebyrace.csv')
+    matchup_df['league'] = pd.Categorical(matchup_df['league'], categories=['Bronze 3','Bronze 2','Bronze 1',
+                                                            'Silver 3', 'Silver 2','Silver 1',
+                                                            'Gold 3','Gold 2','Gold 1','Platinum 3',
+                                                            'Platinum 2', 'Platinum 1', 'Diamond 3',
+                                                            'Diamond 2','Diamond 1', 'Masters 3','Masters 2','Masters 1','Grandmaster'], ordered=True)
 
-    dodge_text = position_dodge(width=0.9)
-
-    figure2=(ggplot(df, aes(x='Race', y='Ratio', fill='category'))
-    + geom_col(stat='identity', position='dodge', show_legend=False)
-    + geom_text(aes(y=-.5, label='category'),
-                position=dodge_text,
-                color='gray', size=8, angle=45, va='top')
-    + geom_text(aes(label='Ratio'),
-                position=dodge_text,
-                size=8, va='bottom', format_string='{}%')
-    + lims(y=(0, 1.2))
-    )
+    matchupwinrates = ggplot(matchup_df, aes(x="league", y="Win Rate", group="Match")) +\
+        geom_line(mapping=aes(linetype='Match', color='Match')) +\
+        labs(title='Win Rate by Match') +\
+        scale_color_manual(values=('#244CB9', '#E1A95F', '#5519BD')) +\
+        theme(axis_text_x=element_text(rotation=30, hjust=4)) + \
+        theme(figure_size=(16, 8))
 
     #----------------------------Matches Datafram Visualizations-------------------------
 
@@ -134,4 +136,4 @@ def generateplots():
                     theme(figure_size=(8, 12))
         )
 
-    return figure1, figure2, figure3, figure_timeheatmap
+    return server_dist, race_dist, racewinrates, matchupwinrates, figure_timeheatmap
