@@ -1,6 +1,30 @@
 # Starcraft 2: Player and matches data analysis
 
+![starcraft2cover](static/img/starcraftii_cover.jpg)
+
 ## Motivation
+
+### What is Starcraft 2?
+Starcraft II is a real-time military science fiction video game, developed by Blizzard Entertainment for PC and Mac.People win by destroying all of their opponents' buildings. 
+
+![starcraft2gameplay](static/img/starcraftii_gameplay.png)
+
+### Initial Goals
+What made us interested in this? We embarked on the project with some questions in mind:
+-Why are some players ranked higher than others?
+-How exactly does practicing more games affect players' skill levels?
+-What is the association between a player's short and long term performance?
+-Is the game well-balanced in its mechanics? E.g. Does one race win more often than other races?
+-Why are Koreans so good? 
+
+Of course, these are simply some of the questions that spurred us to take up this project. We acknowledge that not all these questions can be answered by our data analysis, and the research path we took did not strictly follow these. However, this was what guided us initially.
+
+### How does Starcraft 2 work?
+
+Players play in matches against one another. These matches take place in 3 servers - US, EU and Korea. Players can choose from different 3 different character Races - ZERG, PROTOSS and TERRAN (or they can choose a RANDOM race), each race with different characteristics hence strengths and weaknesses.
+
+Players are put into different leagues based on their skill level. There are a total of 19 different leagues (Bronze 1/2/3, Silver 1/2/3, Gold 1/2/3, Platinum 1/2/3, Diamond 1/2/3, Master 1/2/3, Grandmaster). Their skill levels are given by a scoring system called Matchmaking Rating (abbreviated as MMR). Based on their performance, their MMR score changes and they can move up and down leagues.
+
 
 ## Data collection
 We want to collect player and match data of all players in the current ladder season. Activition Blizzard has player profile data and match history data stored on their servers. We are able to access those raw data using the [Blizzard Battle.net API](https://develop.battle.net/documentation/starcraft-2/community-apis) as our data source. 
