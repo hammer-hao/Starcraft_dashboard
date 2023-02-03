@@ -180,7 +180,7 @@ This figure shows the win rate of each league by race. As the figure illustrates
 
 As shown by the figure above, it turned out that in lower-level leagues, from Bronze 3 to Gold 2, ZERG significantly outperforms TERRAN, and the situation is similar for PROTOSS except for Bronze 3. However, when it comes to the upper leagues, ZERG players generally underperform when they play against players of the other two races, except for the case where ZERG plays against PROTOSS in Masters 2 league. It is also worth noting that in the upper leagues, when playing against each other, TERRAN tends to win more often than PROTOSS, which is consistent with what's shown by the previous figure.
 
-Therefore, based on what these three figures show, the degree of game balance varies across leagues.
+Therefore, based on what the figures show, the degree of game balance varies across leagues.
 
 
 
