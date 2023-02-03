@@ -5,7 +5,7 @@
 ## Motivation
 
 ### What is Starcraft 2?
-Starcraft II is a real-time military science fiction video game, developed by Blizzard Entertainment for PC and Mac.People win by destroying all of their opponents' buildings. 
+Starcraft II is a real-time military science fiction video game, developed by Blizzard Entertainment for PC and Mac. People win by destroying all of their opponents' buildings. 
 
 ![starcraft2gameplay](static/img/starcraftii_gameplay.png)
 
