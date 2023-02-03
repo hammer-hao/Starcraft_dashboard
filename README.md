@@ -28,6 +28,7 @@ DBNAME=<your database name>
 DBUSERNAME=<your database username>
 PASSWORD=<your database password>
 ```
+> Alternatively, you can set up the a local database. You will need to specify the local database in `engine` in the following scripts: `dataprocessing.py` and `Visualizations.py`
 
 ## Running the code
 1. Once everything is set up, simply execute ```task.py``` under the /API requests/ folder:
