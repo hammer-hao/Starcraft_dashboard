@@ -1,6 +1,8 @@
 # Starcraft-Dashboard: Player and matches data analysis of starcraft II
 
-![starcraft2cover](static/img/starcraftii_cover.png)
+<center>
+<img src="static/img/starcraftii_cover.png"  width=350px>
+</center>
 
 # Motivation
 
