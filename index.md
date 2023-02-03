@@ -11,9 +11,13 @@ In their API, Blizzard provides a variety of metadata such as player achievement
 The data we want comes from a variety of API endpoints. Some important ones are the `legacy/getLeagueData` endpoint, `/Ladder` endpoint, as well as the `/getmatchhistory` endpoint.
 ![datacollectionflowchart](static/img/datacollectionflowchart.png)
 
-The figure above shows the basic structure of the Battle.net API endpoints for Starcraft II. To begin, we make a request to the `legacy/getLeagueData` endpoint which returns the `ladderid` of all active ladders in the current season. Then we make a request to the `ladder` endpoint using `ladderid` to obtain the list of `playerid` within the ladder. In the end, `playerid` is used to request the player's profile and their match history.
+The figure above shows the basic structure of the Battle.net API endpoints for Starcraft II. Note that unlike on the figure, going down each branch in the data results in increase in data entries by an order of magnitude of considerable larger. To begin, we make a request to the `legacy/getLeagueData` endpoint which returns the `ladderid` of all active ladders in the current season. This should give about 2000 unique `ladderid`, which each contain around 100 players.  Then we make a request to the `ladder` endpoint using `ladderid` to obtain the list of `playerid` within the ladder. By this point, we should be able to track the profile of around 200,000 players with all three servers (US, EU, and KR) combined. In the end, a player's `playerid` is used to request the player's profile and their match history. The `matchhistory` endpoint stores the 25 most recent matches of a player regardless of when the matches were played. The resulting data should consist of around 5,000,000 matches for 200,000 players.
 
-One issue that arises during data collection is the managing complexity of interactions between API endpoints. Due to the immense amount of raw data generated in the game, Blizzard had to store player level data in different endpoints. For instance, the `/profile/ladder` endpoint stores all performance data of players in a ladder (a mini-league uniquely identified by a `ladderid` that contains 100 players of the same level). However, to access the `/profile/ladder` endpoint, one must specify the `ladderid` as well as `playerid` in the API call, as the request is made at the player level.
+### Facing the API side problems
+
+An obvious issue that arises is the complications that come with making tremendous amounts of API calls in our code. One factor that feed into this issue is the request quota, where single clients were able to make up at most 36,000 API requests per hour. (which is more generous than most other API providers) This results in at least $\frac{200000}{36000}=5.33$ hours of runtime to fetch the match data. The code becomes a nightmare to debug, since if the exceptions were not carefully considered, one `IndexError` caused by missing values on the serverside may result in the termination of the script.
+
+Another issue that arises during data collection is the managing complexity of interactions between API endpoints. Due to the immense amount of raw data generated in the game, Blizzard had to store player level data in different endpoints. For instance, the `/profile/ladder` endpoint stores all performance data of players in a ladder (a mini-league uniquely identified by a `ladderid` that contains 100 players of the same level). However, to access the `/profile/ladder` endpoint, one must specify the `ladderid` as well as `playerid` in the API call, as the request is made at the player level.
 
 ### Making things less messy: OOP approach
 
@@ -21,6 +25,29 @@ We used a object-oriented approach to make API requests, defining `player` and `
 
 ![umldiagram](static/img/UMLclassdiagram.png)
 
+## Using databases to store and update data
+
+```Python
+import pandas as pd
+from sqlalchemy import create_engine
+from SC2 import APIkey
+
+hostname=APIkey.dbhostname
+dbname=APIkey.dbname
+uname=APIkey.dbusername
+pwd=APIkey.password
+
+#Establish connection with mySQL server
+engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}"
+				.format(host=hostname, db=dbname, user=uname, pw=pwd))
+#Read saved raw data from the server
+players_df=pd.read_sql('SELECT * FROM players', engine)
+
+...
+
+#Save processed dataframe as new table
+players_df.to_sql('processedplayers', engine, if_exists='replace', index=False)
+```
 
 ## Exploratory analysis on fetched data
 
@@ -36,8 +63,6 @@ Using API requests we are able to gather data on ~200,000 individual player prof
 |1919810|Van|1|3|5436|Masters 1|34|25|Zerg|
 
 ### Summary Statistics
-
-
 
 ### Match level data example (not real data)
 
