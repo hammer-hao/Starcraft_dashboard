@@ -2,14 +2,14 @@
 
 ![starcraft2cover](static/img/starcraftii_cover.png)
 
-## Motivation
+# Motivation
 
-### What is Starcraft II?
+## What is Starcraft II?
 Starcraft II is a real-time military science fiction video game, developed by Blizzard Entertainment for PC and Mac. People win by destroying all of their opponents' buildings. 
 
 ![starcraft2gameplay](https://www.kotaku.com.au/wp-content/uploads/sites/3/2016/03/01/txgs2i1o2eyfarofz8he.gif)
 
-### Initial Goals
+## Initial Goals
 What made us interested in this? We embarked on the project with some questions in mind:
 -Why are some players ranked higher than others?
 -How exactly does practicing more games affect players' skill levels?
@@ -19,17 +19,17 @@ What made us interested in this? We embarked on the project with some questions 
 
 Of course, these are simply some of the questions that spurred us to take up this project. We acknowledge that not all these questions can be answered by our data analysis, and the research path we took did not strictly follow these. However, this was what guided us initially.
 
-### How does Starcraft II work?
+## How does Starcraft II work?
 
 Players play in matches against one another. These matches take place in 3 servers - US, EU and Korea. Players can choose from different 3 different character Races - ZERG, PROTOSS and TERRAN (or they can choose a RANDOM race), each race with different characteristics hence strengths and weaknesses.
 
 Players are put into different leagues based on their skill level. There are a total of 19 different leagues (Bronze 1/2/3, Silver 1/2/3, Gold 1/2/3, Platinum 1/2/3, Diamond 1/2/3, Master 1/2/3, Grandmaster). Their skill levels are given by a scoring system called Matchmaking Rating (abbreviated as MMR). Based on their performance, their MMR score changes and they can move up and down leagues.
 
 
-## Data collection
+# Data collection
 We want to collect player and match data of all players in the current ladder season. Activition Blizzard has player profile data and match history data stored on their servers. We are able to access those raw data using the [Blizzard Battle.net API](https://develop.battle.net/documentation/starcraft-2/community-apis) as our data source. 
 
-### Using the API
+## Using the API
 In their API, Blizzard provides a variety of metadata such as player achievements and in-game rewards. We want to access specifically the data on player performance (e.g. Wins/losses, matchmaking rating, rank) as well as their match history. 
 
 The data we want comes from a variety of API endpoints. Some important ones are the `legacy/getLeagueData` endpoint, `/Ladder` endpoint, as well as the `/getmatchhistory` endpoint.
@@ -37,7 +37,7 @@ The data we want comes from a variety of API endpoints. Some important ones are 
 
 The figure above shows the basic structure of the Battle.net API endpoints for Starcraft II. Note that unlike on the figure, going down each branch in the data results in increase in data entries by an order of magnitude of considerable larger. To begin, we make a request to the `legacy/getLeagueData` endpoint which returns the `ladderid` of all active ladders in the current season. This should give about 2000 unique `ladderid`, which each contain around 100 players.  Then we make a request to the `ladder` endpoint using `ladderid` to obtain the list of `playerid` within the ladder. By this point, we should be able to track the profile of around 200,000 players with all three servers (US, EU, and KR) combined. In the end, a player's `playerid` is used to request the player's profile and their match history. The `matchhistory` endpoint stores the 25 most recent matches of a player regardless of when the matches were played. The resulting data should consist of around 5,000,000 matches for 200,000 players.
 
-### Facing the API side problems
+## Facing the API side problems
 
 An obvious issue that arises is the complications that come with making tremendous amounts of API calls in our code. One factor that feed into this issue is the request quota, where single clients were able to make up at most 36,000 API requests per hour. (which is more generous than most other API providers) This results in at least $\frac{200000}{36000}=5.33$ hours of runtime to fetch the match data. The code becomes a nightmare to debug, since if the exceptions were not carefully considered, one `IndexError` caused by missing values on the serverside may result in the termination of the script.
 
@@ -73,7 +73,33 @@ players_df=pd.read_sql('SELECT * FROM players', engine)
 players_df.to_sql('processedplayers', engine, if_exists='replace', index=False)
 ```
 
-### Data Cleaning
+# Exploratory analysis on fetched data
+
+Using API requests we are able to gather data on ~200,000 individual player profiles and ~5,000,000 matches. Note that since games are being played everyday and players are constantly joining/leaving the ladder, the number will vary slightly each time data is updated.
+
+### Player level data example (not real data)
+
+|Playerid|Name|Realm|Region|Rating|League|Wins|Losses|Race|
+|--------|----|-----|------|------|------|----|------|----|
+|1074576|SRHarstem|1|2|6700|Grandmaster|10|2|Protoss|
+|2754199|Alucard|1|1|3454|Diamond 3|102|110|Terran|
+|114514|Billy|1|2|2870|Platinum 2|45|40|Protoss|
+|1919810|Van|1|3|5436|Masters 1|34|25|Zerg|
+
+### Summary Statistics
+
+### Match level data example (not real data)
+
+|Playerid|Name|Realm|Region|Race|Map|Type|Result|Speed|Date|
+|--------|----|-----|------|----|--|------|----|------|----|
+|1074576|SRHarstem|1|2|Protoss|Babylon|1v1|Win|faster|1675124962|
+|1074576|TLSkillous|1|2|Protoss|Altitude|1v1|Win|faster|1669691322|
+|1074576|EnceSerral|1|1|Zerg|Data-C|1v1|Win|faster|1671114514|
+|1074576|OnsydeMaru|1|3|Terran|Moondance|1v1|Loss|faster|1675106898|
+
+## Data Cleaning
+
+Before making visualizations, we had to make sure that the Data is nice and tidy. The battle.net API has a quite few bugs, this includes missing data from the server side, as well as flat-out wrong data. It is crucial that we filter out those corrupted data enries before performing analysis.
 
 The raw API contains bugged data points that would affect the outcome of the analysis. For example, duplicate player data may skew the results; abserd MMR scores are simply invalid and do not add value to the analysis; league labels do not necessarily match the MMR scores.
 
@@ -125,33 +151,6 @@ Note that, as the API is slightly bugged, not all league-MMR boundaries are accu
 
 Additionally, we added columns "Total Games" (given by wins+losses) and "Win Rate" (given by wins/totalgames) as they would prove useful in the analysis below.
 
-## Exploratory analysis on fetched data
-
-Using API requests we are able to gather data on ~200,000 individual player profiles and ~5,000,000 matches. Note that since games are being played everyday and players are constantly joining/leaving the ladder, the number will vary slightly each time data is updated.
-
-### Player level data example (not real data)
-
-|Playerid|Name|Realm|Region|Rating|League|Wins|Losses|Race|
-|--------|----|-----|------|------|------|----|------|----|
-|1074576|SRHarstem|1|2|6700|Grandmaster|10|2|Protoss|
-|2754199|Alucard|1|1|3454|Diamond 3|102|110|Terran|
-|114514|Billy|1|2|2870|Platinum 2|45|40|Protoss|
-|1919810|Van|1|3|5436|Masters 1|34|25|Zerg|
-
-### Summary Statistics
-
-### Match level data example (not real data)
-
-|Playerid|Name|Realm|Region|Race|Map|Type|Result|Speed|Date|
-|--------|----|-----|------|----|--|------|----|------|----|
-|1074576|SRHarstem|1|2|Protoss|Babylon|1v1|Win|faster|1675124962|
-|1074576|TLSkillous|1|2|Protoss|Altitude|1v1|Win|faster|1669691322|
-|1074576|EnceSerral|1|1|Zerg|Data-C|1v1|Win|faster|1671114514|
-|1074576|OnsydeMaru|1|3|Terran|Moondance|1v1|Loss|faster|1675106898|
-
-
-
-
 ## Is the game well-balanced in its mechanics? 
 
 A question of interest is "Is the game well balanced in its mechanics? " In this case, game balance refers to the situation where there doesn't exist a dominant race that outperforms the rest due to its extra uplifted strength or its lower difficulty to play with. In this section, we will present three diagrams to explore the question preliminarily.
@@ -171,8 +170,6 @@ However, there are several drawbacks to using MMR value as an indication of perf
 This figure shows the win rate of each league by race. As the figure illustrates, the win rate generally increases as the league goes up. The only exception is the sudden drop in the win rate of PROTOSS in the Masters 3 and Masters 2 leagues. The win rates of all races overlap in the lower leagues Bronze 1 and Silver 3, and middle-upper leagues Platinum 2 and Platinum 1. In the upper leagues from Diamond 2 to Grandmaster, TERRAN particularly tends to outperform the rest. This little heterogeneity makes us wonder: when playing against each other, is there one race that particularly outperforms the other? 
 
 ### **Matchup-wise win rates by league**
-
-
 
 ![matchupwinratesbyleague](static/img/matchup_winrates_by_league.png)
 
