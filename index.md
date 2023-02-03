@@ -54,6 +54,10 @@ We used a object-oriented approach to make API requests, defining `player` and `
 
 ## Using databases to store and update data
 
+When the dataset contains such a tremendous amount of entries, using .csv to save will undermine our efficiency and version control. Therefore, we hosted a free tier RDS (Relational Database Service) on Amazon web Services. We are granted 20GB of storage, which should be plenty to store out data.
+
+A common workflow with the database looks something like this:
+
 ```Python
 import pandas as pd
 from sqlalchemy import create_engine
@@ -75,6 +79,11 @@ players_df=pd.read_sql('SELECT * FROM players', engine)
 #Save processed dataframe as new table
 players_df.to_sql('processedplayers', engine, if_exists='replace', index=False)
 ```
+Notice that instead of doing df.to_csv and pd.read_csv, we are saving and querying tables from a online database. This has several advantages:
+* Faster save and load times
+* Everyone can have the same version of the data
+* It is easy to update the data (simply override the table)
+* We can easily branch off and use the database as a backend for other applications. (in fact, we already made one [here](https://sc2dashboard.herokuapp.com)!)
 
 # Exploratory analysis on fetched data
 
