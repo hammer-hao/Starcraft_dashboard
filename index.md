@@ -1,10 +1,10 @@
-<center>
+<div style='text-align:center'>
 
 # Starcraft-Dashboard: Player and matches data analysis of starcraft II
 
 ## 🟢Check out our web application [here](https://sc2dashboard.herokuapp.com)!🟢
 
-</center>
+</div>
 
 <p style='text-align:center'>
 <img src="static/img/starcraftii_cover.png"  width=200px>
@@ -46,7 +46,7 @@ The figure above shows the basic structure of the Battle.net API endpoints for S
 
 ## Facing the API side problems
 
-An obvious issue that arises is the complications that come with making tremendous amounts of API calls in our code. One factor that feed into this issue is the request quota, where single clients were able to make up at most 36,000 API requests per hour. (which is more generous than most other API providers) This results in at least $\frac{200000}{36000}=5.33$ hours of runtime to fetch the match data. The code becomes a nightmare to debug, since if the exceptions were not carefully considered, one `IndexError` caused by missing values on the serverside may result in the termination of the script.
+An obvious issue that arises is the complications that come with making tremendous amounts of API calls in our code. One factor that feed into this issue is the request quota, where single clients were able to make up at most 36,000 API requests per hour. (which is more generous than most other API providers) This results in at least 200,000/36,000 = 5.33 hours of runtime to fetch the match data. The code becomes a nightmare to debug, since if the exceptions were not carefully considered, one `IndexError` caused by missing values on the serverside may result in the termination of the script.
 
 Another issue that arises during data collection is the managing complexity of interactions between API endpoints. Due to the immense amount of raw data generated in the game, Blizzard had to store player level data in different endpoints. For instance, the `/profile/ladder` endpoint stores all performance data of players in a ladder (a mini-league uniquely identified by a `ladderid` that contains 100 players of the same level). However, to access the `/profile/ladder` endpoint, one must specify the `ladderid` as well as `playerid` in the API call, as the request is made at the player level.
 
@@ -194,7 +194,8 @@ Note that there exist duplicate columns after the merge that contain overlapped 
 ### Finding an opponent for the matches: an temporary, to-be-improved solution to a sub-optimal scenario
 
 Unfortunately, the `getmatchhistory` only returns the match data from the point of view of the player that is associated with the `playerid` used to call the endpoint. This meant that each match played by player1 and player2 is licely recorded twice in the matches dataframe: once with player1's `playerid` and once with player2's  `playerid`. To fix this issue and find the missing opponent for all match entries, we used a [simple algorithm](#appendix) that for sure does not find the right opponent every time, but nevertheless seemed unbiased in its estimates:
-$$Match_i=argmin_{match_i}\Delta MMR^2+\Delta Data^2$$
+
+![math](static/img/math.png)
 
 In English, for each match, we are find another match that is played roughly the same time, around the same rating, played on the same map, and the other match's owner has the opposite win/loss result.
 
