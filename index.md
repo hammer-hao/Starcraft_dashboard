@@ -1,6 +1,6 @@
 # Starcraft-Dashboard: Player and matches data analysis of starcraft II
 
-# 🟢Check out our web application [here](https://sc2dashboard.herokuapp.com)!🟢
+### 🟢Check out our web application [here](https://sc2dashboard.herokuapp.com)!🟢
 
 <p style='text-align:center'>
 <img src="static/img/starcraftii_cover.png"  width=200px>
