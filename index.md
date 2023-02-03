@@ -156,8 +156,7 @@ Using API requests we are able to gather data on ~200,000 individual player prof
 
 A question of interest is "Is the game well balanced in its mechanics? " In this case, game balance refers to the situation where there doesn't exist a dominant race that outperforms the rest due to its extra uplifted strength or its lower difficulty to play with. In this section, we will present three diagrams to explore the question preliminarily.
 
-### **<br>MMR (Matchmaking rating) distribution by in-game race:**
-<br>  
+### **MMR (Matchmaking rating) distribution by in-game race:**
 
 ![mmrdistributionbyrace](static/img/MMR_distribution_by_race.png)
 
@@ -165,14 +164,13 @@ This figure gives an overall picture of the MMR distribution of each race. As sh
 
 However, there are several drawbacks to using MMR value as an indication of performance and skill. For instance, there exist some smurfs who specifically create or buy low-level accounts to play against lower-ranked players. In this case, their MMR would underestimate their performance and skill level. Moreover, MMR value could also be manipulated via hacking, which is not a rare thing that happens in many servers. Among all the servers, the Chinese server is the one where hacking takes place most often; thus, we didn't collect the data on players on the Chinese server intentionally. Therefore, considering the susceptibility of MMR, it would be more appropriate to use win rate as an indicator of performance. 
 
-### <br>**Race-wise win rates by league**
-<br>  
+### **Race-wise win rates by league**  
 
 ![racewinratesbyleague](static/img/win_rate_by_race.png)
 
 This figure shows the win rate of each league by race. As the figure illustrates, the win rate generally increases as the league goes up. The only exception is the sudden drop in the win rate of PROTOSS in the Masters 3 and Masters 2 leagues. The win rates of all races overlap in the lower leagues Bronze 1 and Silver 3, and middle-upper leagues Platinum 2 and Platinum 1. In the upper leagues from Diamond 2 to Grandmaster, TERRAN particularly tends to outperform the rest. This little heterogeneity makes us wonder: when playing against each other, is there one race that particularly outperforms the other? 
 
-### <br>**Matchup-wise win rates by league**
+### **Matchup-wise win rates by league**
 
 
 
@@ -184,8 +182,7 @@ Therefore, based on what the figures show, the degree of game balance varies acr
 
 
 
-## What proportion of race A is in league B? 
-
+## How are the in-game races distributed across leagues? 
 
 As previously established, in Starcraft 2 we have three main races - TERRAN, PROTOSS, and ZERG. In some circumstances, players are also able to choose a ‘RANDOM’ race at the beginning of a match. In terms of leagues, the game boasts 19 different leagues with ‘Bronze 3’ being the lowest and ‘Grandmaster’ being the highest.
 
