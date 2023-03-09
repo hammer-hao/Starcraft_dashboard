@@ -1,6 +1,7 @@
 /.vscode
 *.save
 /venv
+*.png
 
 # Compiled source #
 ###################
