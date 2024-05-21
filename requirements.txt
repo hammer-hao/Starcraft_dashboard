@@ -11,5 +11,5 @@ pymysql==1.0.2
 cryptography>=42.0.4
 mysql-connector==2.2.9
 ### UTILS
-jupyterlab==3.4.2
+jupyterlab==3.6.7
 tqdm==4.62.0
